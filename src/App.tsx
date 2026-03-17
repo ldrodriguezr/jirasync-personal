@@ -1,4 +1,4 @@
-mport { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 
 // LLAVES DE SUPABASE

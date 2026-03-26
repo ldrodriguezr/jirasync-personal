@@ -25,22 +25,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
 
   const refreshProjects = useCallback(async () => {
-    const data = await getProjects();
-    setProjects(data);
-    // Restore persisted active project
-    const savedId = localStorage.getItem('jirasync_active_project');
-    if (savedId) {
-      const found = data.find((p) => p.id === savedId);
-      if (found) setActiveProjectState(found);
-      else if (data.length > 0) setActiveProjectState(data[0]);
-    } else if (data.length > 0) {
-      setActiveProjectState(data[0]);
+    try {
+      const data = await getProjects();
+      setProjects(data);
+      const savedId = localStorage.getItem('jirasync_active_project');
+      if (savedId) {
+        const found = data.find((p) => p.id === savedId);
+        if (found) setActiveProjectState(found);
+        else if (data.length > 0) setActiveProjectState(data[0]);
+      } else if (data.length > 0) {
+        setActiveProjectState(data[0]);
+      }
+    } catch (e) {
+      console.error('refreshProjects error:', e);
     }
   }, []);
 
   const refreshProfiles = useCallback(async () => {
-    const data = await getAllProfiles();
-    setProfiles(data);
+    try {
+      const data = await getAllProfiles();
+      setProfiles(data);
+    } catch (e) {
+      console.error('refreshProfiles error:', e);
+    }
   }, []);
 
   const setActiveProject = useCallback((p: Project | null) => {
@@ -53,53 +60,62 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
-  useEffect(() => {
-    // Restore session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        let profile = await getProfile(session.user.id);
-        if (!profile) {
-          // Create profile if missing (e.g., existing auth users)
-          await upsertProfile({
-            id: session.user.id,
-            email: session.user.email ?? '',
-            full_name: session.user.user_metadata?.full_name ?? null,
-            avatar_url: null,
-          });
-          profile = await getProfile(session.user.id);
-        }
-        setUser(profile);
-        await Promise.all([refreshProjects(), refreshProfiles()]);
+  /** Resolve or create profile for an authenticated user */
+  const resolveProfile = useCallback(async (authUser: {
+    id: string;
+    email?: string;
+    user_metadata?: Record<string, unknown>;
+  }): Promise<Profile | null> => {
+    try {
+      let profile = await getProfile(authUser.id);
+      if (!profile) {
+        await upsertProfile({
+          id: authUser.id,
+          email: authUser.email ?? '',
+          full_name: (authUser.user_metadata?.['full_name'] as string) ?? null,
+          avatar_url: null,
+        });
+        profile = await getProfile(authUser.id);
       }
-      setLoading(false);
-    });
+      return profile;
+    } catch (e) {
+      console.error('resolveProfile error:', e);
+      return null;
+    }
+  }, []);
 
-    // Auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        let profile = await getProfile(session.user.id);
-        if (!profile) {
-          await upsertProfile({
-            id: session.user.id,
-            email: session.user.email ?? '',
-            full_name: session.user.user_metadata?.full_name ?? null,
-            avatar_url: null,
-          });
-          profile = await getProfile(session.user.id);
+  useEffect(() => {
+    // Single source of truth: onAuthStateChange handles both initial session
+    // (INITIAL_SESSION event) and subsequent sign-in/sign-out events.
+    // The try/finally guarantees setLoading(false) always runs.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        try {
+          if (event === 'SIGNED_OUT') {
+            setUser(null);
+            setProjects([]);
+            setProfiles([]);
+            setActiveProjectState(null);
+            return;
+          }
+
+          if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+            const profile = await resolveProfile(session.user);
+            setUser(profile);
+            if (profile) {
+              await Promise.all([refreshProjects(), refreshProfiles()]);
+            }
+          }
+        } catch (e) {
+          console.error('AppContext auth error:', e);
+        } finally {
+          setLoading(false);
         }
-        setUser(profile);
-        await Promise.all([refreshProjects(), refreshProfiles()]);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setProjects([]);
-        setProfiles([]);
-        setActiveProjectState(null);
       }
-      setLoading(false);
-    });
+    );
 
     return () => subscription.unsubscribe();
-  }, [refreshProjects, refreshProfiles]);
+  }, [resolveProfile, refreshProjects, refreshProfiles]);
 
   return (
     <AppContext.Provider

@@ -26,7 +26,20 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 Open your Supabase project → SQL Editor → paste and run the contents of:
 ```
-supabase/migrations/001_initial_schema.sql
+supabase/migrations/002_jira_schema_and_legacy_import.sql
+```
+
+If you want to recover legacy tickets from the old version (`public.tasks` with `id='main_board'`), run this after the migration:
+```sql
+select jira.import_legacy_main_board();
+```
+
+Quick verification query:
+```sql
+select table_name
+from information_schema.tables
+where table_schema = 'jira'
+order by table_name;
 ```
 
 ### 3. Install & run

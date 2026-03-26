@@ -85,6 +85,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    console.log('[AppContext v4] useEffect running');
+
+    // Safety-net: force loading=false after 4 s no matter what
+    const safetyTimer = setTimeout(() => {
+      if (mounted) {
+        console.warn('[AppContext v4] safety timeout — forcing setLoading(false)');
+        setLoading(false);
+      }
+    }, 4000);
 
     // ── Initial session check (guaranteed to call setLoading(false)) ──────────
     supabase.auth
@@ -107,9 +116,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch((e) => {
-        console.error('getSession error:', e);
+        console.error('[AppContext v4] getSession error:', e);
         if (mounted) setLoading(false);
-      });
+      })
+      .finally(() => clearTimeout(safetyTimer));
 
     // ── Listen for subsequent auth changes (sign in / sign out) ───────────────
     const {
@@ -143,6 +153,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, [resolveProfile, refreshProjects, refreshProfiles]);

@@ -83,17 +83,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const withTimeout = useCallback(async <T,>(
+    promise: Promise<T>,
+    ms: number,
+    fallback: T
+  ): Promise<T> => {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    const timeoutPromise = new Promise<T>((resolve) => {
+      timeoutId = setTimeout(() => resolve(fallback), ms);
+    });
+    const result = await Promise.race([promise, timeoutPromise]);
+    if (timeoutId) clearTimeout(timeoutId);
+    return result;
+  }, []);
+
   useEffect(() => {
     let mounted = true;
-    console.log('[AppContext v4] useEffect running');
-
-    // Safety-net: force loading=false after 4 s no matter what
-    const safetyTimer = setTimeout(() => {
-      if (mounted) {
-        console.warn('[AppContext v4] safety timeout — forcing setLoading(false)');
-        setLoading(false);
-      }
-    }, 4000);
+    // Safety-net: force loading=false after 5s no matter what
+    const safetyTimer = setTimeout(() => { if (mounted) setLoading(false); }, 5000);
 
     // ── Initial session check (guaranteed to call setLoading(false)) ──────────
     supabase.auth
@@ -102,11 +109,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (!mounted) return;
         try {
           if (session?.user) {
-            const profile = await resolveProfile(session.user);
+            const profile = await withTimeout(resolveProfile(session.user), 3000, null);
             if (!mounted) return;
             setUser(profile);
-            if (profile) {
-              await Promise.all([refreshProjects(), refreshProfiles()]);
+            // Fetch additional data in parallel but never block loading forever
+            if (profile && mounted) {
+              await Promise.allSettled([
+                withTimeout(refreshProjects(), 3000, undefined),
+                withTimeout(refreshProfiles(), 3000, undefined),
+              ]);
             }
           }
         } catch (e) {
@@ -116,7 +127,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       })
       .catch((e) => {
-        console.error('[AppContext v4] getSession error:', e);
+        console.error('getSession error:', e);
         if (mounted) setLoading(false);
       })
       .finally(() => clearTimeout(safetyTimer));
@@ -136,12 +147,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           return;
         }
         if (event === 'SIGNED_IN' && session?.user) {
-          setLoading(true);
-          const profile = await resolveProfile(session.user);
+          // Do not lock the whole app on sign-in follow-up calls.
+          const profile = await withTimeout(resolveProfile(session.user), 3000, null);
           if (!mounted) return;
           setUser(profile);
           if (profile) {
-            await Promise.all([refreshProjects(), refreshProfiles()]);
+            await Promise.allSettled([
+              withTimeout(refreshProjects(), 3000, undefined),
+              withTimeout(refreshProfiles(), 3000, undefined),
+            ]);
           }
           if (mounted) setLoading(false);
         }
@@ -156,7 +170,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
-  }, [resolveProfile, refreshProjects, refreshProfiles]);
+  }, [resolveProfile, refreshProjects, refreshProfiles, withTimeout]);
 
   return (
     <AppContext.Provider

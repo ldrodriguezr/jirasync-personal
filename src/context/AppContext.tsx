@@ -17,6 +17,20 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
+function authUserToProfile(authUser: {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+}): Profile {
+  return {
+    id: authUser.id,
+    email: authUser.email ?? '',
+    full_name: (authUser.user_metadata?.['full_name'] as string) ?? null,
+    avatar_url: null,
+    created_at: new Date().toISOString(),
+  };
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +93,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return profile;
     } catch (e) {
       console.error('resolveProfile error:', e);
-      return null;
+      // Never block login due to profile table issues.
+      return authUserToProfile(authUser);
     }
   }, []);
 
@@ -111,7 +126,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (session?.user) {
             const profile = await withTimeout(resolveProfile(session.user), 3000, null);
             if (!mounted) return;
-            setUser(profile);
+            setUser(profile ?? authUserToProfile(session.user));
             // Fetch additional data in parallel but never block loading forever
             if (profile && mounted) {
               await Promise.allSettled([
@@ -150,7 +165,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           // Do not lock the whole app on sign-in follow-up calls.
           const profile = await withTimeout(resolveProfile(session.user), 3000, null);
           if (!mounted) return;
-          setUser(profile);
+          setUser(profile ?? authUserToProfile(session.user));
           if (profile) {
             await Promise.allSettled([
               withTimeout(refreshProjects(), 3000, undefined),

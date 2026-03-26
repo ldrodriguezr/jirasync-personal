@@ -60,7 +60,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
-  /** Resolve or create profile for an authenticated user */
   const resolveProfile = useCallback(async (authUser: {
     id: string;
     email?: string;
@@ -85,36 +84,67 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Single source of truth: onAuthStateChange handles both initial session
-    // (INITIAL_SESSION event) and subsequent sign-in/sign-out events.
-    // The try/finally guarantees setLoading(false) always runs.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        try {
-          if (event === 'SIGNED_OUT') {
-            setUser(null);
-            setProjects([]);
-            setProfiles([]);
-            setActiveProjectState(null);
-            return;
-          }
+    let mounted = true;
 
-          if (session?.user && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+    // ── Initial session check (guaranteed to call setLoading(false)) ──────────
+    supabase.auth
+      .getSession()
+      .then(async ({ data: { session } }) => {
+        if (!mounted) return;
+        try {
+          if (session?.user) {
             const profile = await resolveProfile(session.user);
+            if (!mounted) return;
             setUser(profile);
             if (profile) {
               await Promise.all([refreshProjects(), refreshProfiles()]);
             }
           }
         } catch (e) {
-          console.error('AppContext auth error:', e);
+          console.error('session init error:', e);
         } finally {
-          setLoading(false);
+          if (mounted) setLoading(false);
         }
-      }
-    );
+      })
+      .catch((e) => {
+        console.error('getSession error:', e);
+        if (mounted) setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+    // ── Listen for subsequent auth changes (sign in / sign out) ───────────────
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+      try {
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setProjects([]);
+          setProfiles([]);
+          setActiveProjectState(null);
+          setLoading(false);
+          return;
+        }
+        if (event === 'SIGNED_IN' && session?.user) {
+          setLoading(true);
+          const profile = await resolveProfile(session.user);
+          if (!mounted) return;
+          setUser(profile);
+          if (profile) {
+            await Promise.all([refreshProjects(), refreshProfiles()]);
+          }
+          if (mounted) setLoading(false);
+        }
+      } catch (e) {
+        console.error('auth change error:', e);
+        if (mounted) setLoading(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [resolveProfile, refreshProjects, refreshProfiles]);
 
   return (

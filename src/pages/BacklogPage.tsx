@@ -1,7 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { GripVertical, Plus, Layers, ChevronDown, ChevronRight } from 'lucide-react';
 import { getIssues, createIssue, updateIssue, getSprints } from '../lib/db';
 import { useApp } from '../context/AppContext';
+import { useRealtimeIssues } from '../hooks/useRealtimeIssues';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import type { Issue, Sprint, IssueType, IssueStatus, Priority } from '../types';
 import { ISSUE_TYPES, ISSUE_STATUSES, PRIORITIES, STATUS_COLORS } from '../types';
 import IssueTypeIcon from '../components/issues/IssueTypeIcon';
@@ -33,6 +35,7 @@ export default function BacklogPage() {
   const [filterType, setFilterType] = useState('');
   const [filterAssignee, setFilterAssignee] = useState('');
   const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     if (!activeProject) return;
@@ -45,6 +48,16 @@ export default function BacklogPage() {
   }, [activeProject]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Real-time: auto-refresh on issue changes
+  useRealtimeIssues(activeProject?.id ?? null, load);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onCreate: () => setShowCreateModal(true),
+    onSearch: () => searchRef.current?.focus(),
+    onEscape: () => { if (showCreateModal) setShowCreateModal(false); },
+  });
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,9 +131,10 @@ export default function BacklogPage() {
         </div>
         <div className="ml-auto flex items-center gap-2">
           <input
+            ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
+            placeholder="Search... (/)"
             className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select

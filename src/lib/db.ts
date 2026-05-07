@@ -7,6 +7,7 @@ import type {
   IssueComment,
   Sprint,
   Profile,
+  ProjectTag,
   IssueStatus,
   IssueType,
   Priority,
@@ -266,4 +267,106 @@ export async function getIssueStats(projectId: string) {
     .eq('project_id', projectId)
     .eq('is_archived', false);
   return data ?? [];
+}
+
+// ── Burndown data ─────────────────────────────────────────────────────────────
+
+export interface BurndownPoint {
+  date: string;      // 'YYYY-MM-DD'
+  remaining: number; // story points remaining on that day
+  ideal: number;     // ideal remaining on that day
+}
+
+/**
+ * Generates daily burndown data for a sprint.
+ * Uses updated_at as a proxy for when issues were moved to 'done'.
+ */
+export async function getBurndownData(
+  projectId: string,
+  sprintId: string
+): Promise<BurndownPoint[]> {
+  const sprints = await getSprints(projectId);
+  const sprint = sprints.find((s) => s.id === sprintId);
+  if (!sprint?.start_date || !sprint?.end_date) return [];
+
+  const { data: issues } = await jiraDb
+    .from('issues')
+    .select('story_points, status, updated_at')
+    .eq('project_id', projectId)
+    .eq('sprint_id', sprintId)
+    .eq('is_archived', false);
+
+  if (!issues || issues.length === 0) return [];
+
+  const startDate = new Date(sprint.start_date);
+  const endDate = new Date(sprint.end_date);
+  const today = new Date();
+  const cutoff = today < endDate ? today : endDate;
+
+  const totalPoints = issues.reduce(
+    (sum: number, i: { story_points: number | null }) => sum + (i.story_points ?? 0),
+    0
+  );
+
+  // Build day-by-day series
+  const points: BurndownPoint[] = [];
+  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+
+  for (let d = 0; d < days; d++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + d);
+    const dateStr = date.toISOString().split('T')[0];
+
+    // Ideal: linear decay from totalPoints to 0
+    const ideal = Math.round(totalPoints * (1 - d / (days - 1)));
+
+    // Actual: only compute up to today (future is undefined)
+    if (date > cutoff) {
+      points.push({ date: dateStr, remaining: -1, ideal });
+      continue;
+    }
+
+    const burned = (
+      issues as Array<{ story_points: number | null; status: string; updated_at: string }>
+    )
+      .filter(
+        (i) =>
+          i.status === 'done' &&
+          i.updated_at &&
+          new Date(i.updated_at) <= new Date(dateStr + 'T23:59:59Z')
+      )
+      .reduce((sum, i) => sum + (i.story_points ?? 0), 0);
+
+    points.push({ date: dateStr, remaining: totalPoints - burned, ideal });
+  }
+
+  return points;
+}
+
+// ── Project Tags ──────────────────────────────────────────────────────────────
+
+export async function getProjectTags(projectId: string): Promise<ProjectTag[]> {
+  const { data } = await jiraDb
+    .from('project_tags')
+    .select('*')
+    .eq('project_id', projectId)
+    .order('name');
+  return (data as ProjectTag[]) ?? [];
+}
+
+export async function createProjectTag(
+  projectId: string,
+  name: string,
+  color = '#6366f1'
+): Promise<ProjectTag | null> {
+  const { data } = await jiraDb
+    .from('project_tags')
+    .insert({ project_id: projectId, name: name.trim(), color })
+    .select()
+    .single();
+  return data as ProjectTag | null;
+}
+
+export async function deleteProjectTag(id: string): Promise<void> {
+  await jiraDb.from('project_tags').delete().eq('id', id);
 }

@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { TrendingUp, CheckCircle2, Clock, AlertCircle, Users, LayoutDashboard } from 'lucide-react';
 import { format, startOfWeek, isAfter, isBefore, parseISO } from 'date-fns';
-import { getIssueStats, getSprints } from '../lib/db';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { getIssueStats, getSprints, getBurndownData, type BurndownPoint } from '../lib/db';
 import { useApp } from '../context/AppContext';
 import type { Sprint } from '../types';
 import { PRIORITIES, TYPE_COLORS } from '../types';
@@ -22,6 +23,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<StatRow[]>([]);
   const [sprints, setSprints] = useState<Sprint[]>([]);
   const [loading, setLoading] = useState(false);
+  const [burndown, setBurndown] = useState<BurndownPoint[]>([]);
+  const [selectedSprintId, setSelectedSprintId] = useState<string>('');
 
   const load = useCallback(async () => {
     if (!activeProject) return;
@@ -32,6 +35,13 @@ export default function DashboardPage() {
     ]);
     setStats(s as StatRow[]);
     setSprints(spr);
+    // Auto-select active sprint for burndown
+    const active = spr.find((sp: Sprint) => sp.status === 'active');
+    if (active) {
+      setSelectedSprintId(active.id);
+      const bd = await getBurndownData(activeProject.id, active.id);
+      setBurndown(bd);
+    }
     setLoading(false);
   }, [activeProject]);
 
@@ -80,6 +90,17 @@ export default function DashboardPage() {
   const donePoints = stats
     .filter((s) => s.status === 'done')
     .reduce((sum, s) => sum + (s.story_points ?? 0), 0);
+
+  const handleBurndownSprintChange = async (sprintId: string) => {
+    if (!activeProject) return;
+    setSelectedSprintId(sprintId);
+    if (sprintId) {
+      const bd = await getBurndownData(activeProject.id, sprintId);
+      setBurndown(bd);
+    } else {
+      setBurndown([]);
+    }
+  };
 
   if (loading) {
     return (
@@ -205,6 +226,53 @@ export default function DashboardPage() {
           })}
         </ChartCard>
       </div>
+
+      {/* Burndown Chart */}
+      {sprints.filter((s) => s.start_date && s.end_date).length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-gray-700">Burndown Chart</h2>
+            <select
+              value={selectedSprintId}
+              onChange={(e) => handleBurndownSprintChange(e.target.value)}
+              className="text-xs border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select sprint</option>
+              {sprints
+                .filter((s) => s.start_date && s.end_date)
+                .map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.status})
+                  </option>
+                ))}
+            </select>
+          </div>
+          {burndown.length > 0 ? (
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={burndown.filter((p) => p.remaining >= 0)} margin={{ top: 4, right: 16, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v) => format(new Date(String(v) + 'T12:00:00'), 'MMM d')}
+                />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip
+                  labelFormatter={(v) => format(new Date(String(v) + 'T12:00:00'), 'MMM d, yyyy')}
+                  formatter={(val, name) => [val, name === 'remaining' ? 'Remaining pts' : 'Ideal']}
+                />
+                <Legend formatter={(v: string) => v === 'remaining' ? 'Actual remaining' : 'Ideal'} />
+                <Line type="monotone" dataKey="ideal" stroke="#94a3b8" strokeDasharray="5 5" dot={false} strokeWidth={1.5} />
+                <Line type="monotone" dataKey="remaining" stroke="#3b82f6" dot={false} strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-sm text-gray-400 text-center py-8">
+              {selectedSprintId ? 'No story points data for this sprint.' : 'Select a sprint to view its burndown.'}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

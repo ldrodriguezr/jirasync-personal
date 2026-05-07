@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
-import { getProfile, getAllProfiles, getProjects, upsertProfile } from '../lib/db';
-import type { Profile, Project } from '../types';
+import { getProfile, getAllProfiles, getProjects, upsertProfile, getProjectTags } from '../lib/db';
+import type { Profile, Project, ProjectTag } from '../types';
 
 interface AppContextType {
   user: Profile | null;
@@ -9,9 +9,11 @@ interface AppContextType {
   activeProject: Project | null;
   projects: Project[];
   profiles: Profile[];
+  projectTags: ProjectTag[];
   setActiveProject: (p: Project | null) => void;
   refreshProjects: () => Promise<void>;
   refreshProfiles: () => Promise<void>;
+  refreshTags: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -37,6 +39,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeProject, setActiveProjectState] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [projectTags, setProjectTags] = useState<ProjectTag[]>([]);
+
+  const refreshTags = useCallback(async (projectId?: string) => {
+    const id = projectId ?? activeProject?.id;
+    if (!id) { setProjectTags([]); return; }
+    try {
+      const tags = await getProjectTags(id);
+      setProjectTags(tags);
+    } catch (e) {
+      console.error('refreshTags error:', e);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProject?.id]);
 
   const refreshProjects = useCallback(async () => {
     try {
@@ -66,8 +81,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setActiveProject = useCallback((p: Project | null) => {
     setActiveProjectState(p);
-    if (p) localStorage.setItem('jirasync_active_project', p.id);
-    else localStorage.removeItem('jirasync_active_project');
+    if (p) {
+      localStorage.setItem('jirasync_active_project', p.id);
+      getProjectTags(p.id).then(setProjectTags).catch(console.error);
+    } else {
+      localStorage.removeItem('jirasync_active_project');
+      setProjectTags([]);
+    }
   }, []);
 
   const signOut = useCallback(async () => {
@@ -195,9 +215,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeProject,
         projects,
         profiles,
+        projectTags,
         setActiveProject,
         refreshProjects,
         refreshProfiles,
+        refreshTags,
         signOut,
       }}
     >

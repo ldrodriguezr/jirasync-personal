@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Plus, Filter, Archive, RefreshCw, Layers } from 'lucide-react';
+import { Plus, Filter, Archive, RefreshCw, Layers, Keyboard } from 'lucide-react';
 import { getIssues, createIssue, updateIssue, getSprints } from '../lib/db';
 import { useApp } from '../context/AppContext';
+import { useRealtimeIssues } from '../hooks/useRealtimeIssues';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import type { Issue, IssueStatus, IssueType, Priority, Sprint } from '../types';
-import { ISSUE_STATUSES, PRIORITIES, ISSUE_TYPES, TAGS, STORY_POINTS } from '../types';
+import { ISSUE_STATUSES, PRIORITIES, ISSUE_TYPES, STORY_POINTS } from '../types';
 import IssueCard from '../components/issues/IssueCard';
 import IssueModal from '../components/issues/IssueModal';
 import Button from '../components/ui/Button';
@@ -49,7 +51,7 @@ const defaultForm: CreateForm = {
 };
 
 export default function BoardPage() {
-  const { user, activeProject, profiles } = useApp();
+  const { user, activeProject, profiles, projectTags } = useApp();
   const [issues, setIssues] = useState<Issue[]>([]);
   const [sprints, setSprints] = useState<Sprint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,6 +63,8 @@ export default function BoardPage() {
   const [filterAssignee, setFilterAssignee] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [search, setSearch] = useState('');
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     if (!activeProject) return;
@@ -75,6 +79,19 @@ export default function BoardPage() {
   }, [activeProject, showArchived]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Real-time: auto-refresh when any issue changes in this project
+  useRealtimeIssues(activeProject?.id ?? null, load);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onCreate: () => { if (!openIssueId) setShowCreateModal(true); },
+    onSearch: () => { searchRef.current?.focus(); },
+    onEscape: () => {
+      if (showCreateModal) setShowCreateModal(false);
+      else if (openIssueId) setOpenIssueId(null);
+    },
+  });
 
   const handleDragEnd = async (result: DropResult) => {
     const { draggableId, destination } = result;
@@ -153,9 +170,10 @@ export default function BoardPage() {
         </div>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
           <input
+            ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search issues..."
+            placeholder="Search issues... (/)"
             className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
@@ -189,8 +207,15 @@ export default function BoardPage() {
           <button onClick={load} className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors" title="Refresh">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
+          <button
+            onClick={() => setShowShortcuts(true)}
+            className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+            title="Keyboard shortcuts"
+          >
+            <Keyboard size={14} />
+          </button>
           <Button onClick={() => setShowCreateModal(true)}>
-            <Plus size={16} /> Create Issue
+            <Plus size={16} /> Create Issue <span className="text-blue-200 text-[10px] ml-1 hidden sm:inline">(C)</span>
           </Button>
         </div>
       </div>
@@ -353,7 +378,7 @@ export default function BoardPage() {
                 className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">None</option>
-                {TAGS.map((t) => <option key={t} value={t}>{t}</option>)}
+                {projectTags.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
               </select>
             </div>
           </div>
@@ -411,6 +436,24 @@ export default function BoardPage() {
           onUpdated={() => load()}
         />
       )}
+
+      {/* Keyboard shortcuts help */}
+      <Modal open={showShortcuts} onClose={() => setShowShortcuts(false)} title="Keyboard Shortcuts">
+        <div className="p-5 space-y-3">
+          {[
+            ['C', 'Create new issue'],
+            ['/', 'Focus search'],
+            ['Esc', 'Close modal / dialog'],
+          ].map(([key, desc]) => (
+            <div key={key} className="flex items-center gap-4">
+              <kbd className="px-2.5 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono font-semibold text-gray-700 min-w-[2.5rem] text-center">
+                {key}
+              </kbd>
+              <span className="text-sm text-gray-600">{desc}</span>
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   );
 }

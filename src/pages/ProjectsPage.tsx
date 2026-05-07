@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Plus, Pencil, Trash2, FolderOpen } from 'lucide-react';
-import { createProject, updateProject, deleteProject } from '../lib/db';
+import React, { useEffect, useState } from 'react';
+import { Plus, Pencil, Trash2, FolderOpen, Tag, X } from 'lucide-react';
+import { createProject, updateProject, deleteProject, getProjectTags, createProjectTag, deleteProjectTag } from '../lib/db';
 import { useApp } from '../context/AppContext';
+import type { ProjectTag } from '../types';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 
@@ -20,11 +21,16 @@ interface ProjectForm {
 const defaultForm: ProjectForm = { name: '', key: '', description: '', color: COLORS[0] };
 
 export default function ProjectsPage() {
-  const { user, projects, activeProject, setActiveProject, refreshProjects } = useApp();
+  const { user, projects, activeProject, setActiveProject, refreshProjects, refreshTags } = useApp();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ProjectForm>(defaultForm);
   const [loading, setLoading] = useState(false);
+  // Tags management
+  const [tagsProjectId, setTagsProjectId] = useState<string | null>(null);
+  const [tags, setTags] = useState<ProjectTag[]>([]);
+  const [newTagName, setNewTagName] = useState('');
+  const [tagLoading, setTagLoading] = useState(false);
 
   const openCreate = () => { setEditingId(null); setForm(defaultForm); setShowModal(true); };
   const openEdit = (id: string) => {
@@ -65,6 +71,36 @@ export default function ProjectsPage() {
     if (activeProject?.id === id) setActiveProject(null);
     await refreshProjects();
   };
+
+  const openTagManager = async (projectId: string) => {
+    setTagsProjectId(projectId);
+    const t = await getProjectTags(projectId);
+    setTags(t);
+    setNewTagName('');
+  };
+
+  const handleAddTag = async () => {
+    if (!newTagName.trim() || !tagsProjectId) return;
+    setTagLoading(true);
+    const tag = await createProjectTag(tagsProjectId, newTagName.trim());
+    if (tag) setTags((prev) => [...prev, tag]);
+    setNewTagName('');
+    setTagLoading(false);
+    if (tagsProjectId === activeProject?.id) refreshTags();
+  };
+
+  const handleDeleteTag = async (tagId: string) => {
+    await deleteProjectTag(tagId);
+    setTags((prev) => prev.filter((t) => t.id !== tagId));
+    if (tagsProjectId === activeProject?.id) refreshTags();
+  };
+
+  // Load tags when active project changes
+  useEffect(() => {
+    if (tagsProjectId) {
+      getProjectTags(tagsProjectId).then(setTags);
+    }
+  }, [tagsProjectId]);
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -120,6 +156,12 @@ export default function ProjectsPage() {
                   <Pencil size={12} /> Edit
                 </button>
                 <button
+                  onClick={(e) => { e.stopPropagation(); openTagManager(p.id); }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition-colors"
+                >
+                  <Tag size={12} /> Tags
+                </button>
+                <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(p.id, p.name); }}
                   className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"
                 >
@@ -130,6 +172,50 @@ export default function ProjectsPage() {
           ))}
         </div>
       )}
+
+      {/* Tag Manager Modal */}
+      <Modal open={!!tagsProjectId} onClose={() => setTagsProjectId(null)} title="Manage Tags">
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-gray-500">
+            Tags for <strong>{projects.find((p) => p.id === tagsProjectId)?.name}</strong>
+          </p>
+          <div className="flex gap-2">
+            <input
+              value={newTagName}
+              onChange={(e) => setNewTagName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+              placeholder="New tag name..."
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+              autoFocus
+            />
+            <Button onClick={handleAddTag} loading={tagLoading}>
+              <Plus size={14} /> Add
+            </Button>
+          </div>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {tags.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-4">No tags yet. Add one above.</p>
+            )}
+            {tags.map((tag) => (
+              <div key={tag.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: tag.color }}
+                  />
+                  <span className="text-sm text-gray-700">{tag.name}</span>
+                </div>
+                <button
+                  onClick={() => handleDeleteTag(tag.id)}
+                  className="text-gray-300 hover:text-red-500 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
 
       {/* Create / Edit Modal */}
       <Modal open={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Edit Project' : 'New Project'}>

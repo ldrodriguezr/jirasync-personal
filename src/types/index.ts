@@ -161,7 +161,19 @@ export const PRIORITIES: { value: Priority; label: string }[] = [
 
 export const STORY_POINTS = [1, 2, 3, 5, 8, 13, 21];
 
+/** @deprecated Tags are now stored per-project in Supabase (jira.project_tags).
+ *  This constant is kept as a fallback while the migration is applied. */
 export const TAGS = ['Finance', 'Project', 'Cloud', 'Meeting', 'Bug', 'Feature'];
+
+// ── Project tags ───────────────────────────────────────────────────────────────
+
+export interface ProjectTag {
+  id: string;
+  project_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+}
 
 export const STATUS_COLORS: Record<IssueStatus, string> = {
   backlog: 'bg-gray-100 text-gray-700',

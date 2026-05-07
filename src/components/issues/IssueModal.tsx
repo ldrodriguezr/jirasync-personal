@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import {
   X, Trash2, Archive, ArchiveRestore, Plus, Link as LinkIcon,
-  Send, ExternalLink,
+  Send, ExternalLink, Eye, Pencil,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import ReactMarkdown from 'react-markdown';
 import {
   getIssue, updateIssue, deleteIssue, archiveIssue,
   addChecklist, toggleChecklist, deleteChecklist,
   addLink, deleteLink, addComment,
 } from '../../lib/db';
+import { useApp } from '../../context/AppContext';
 import type { Issue, IssueType, IssueStatus, Priority, Profile, Sprint } from '../../types';
 import {
   ISSUE_TYPES, ISSUE_STATUSES, PRIORITIES, STORY_POINTS,
-  TAGS, STATUS_COLORS,
+  STATUS_COLORS,
 } from '../../types';
 import IssueTypeIcon from './IssueTypeIcon';
 import PriorityIcon from './PriorityIcon';
@@ -38,6 +40,7 @@ export default function IssueModal({
   onDeleted,
   onUpdated,
 }: IssueModalProps) {
+  const { projectTags } = useApp();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [saving, setSaving] = useState(false);
   const [newCheckText, setNewCheckText] = useState('');
@@ -46,6 +49,7 @@ export default function IssueModal({
   const [newComment, setNewComment] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [descPreview, setDescPreview] = useState(false);
 
   const loadIssue = async () => {
     const data = await getIssue(issueId);
@@ -193,17 +197,35 @@ export default function IssueModal({
               />
             </div>
 
-            {/* Description */}
+            {/* Description with markdown preview */}
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Description</p>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                onBlur={handleSaveText}
-                rows={4}
-                className="w-full text-sm text-gray-700 resize-y border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                placeholder="Add a description..."
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Description</p>
+                <button
+                  onClick={() => setDescPreview((v) => !v)}
+                  className="flex items-center gap-1 text-xs text-gray-400 hover:text-blue-600 transition-colors px-2 py-0.5 rounded border border-gray-200 hover:border-blue-300"
+                >
+                  {descPreview
+                    ? <><Pencil size={11} /> Edit</>
+                    : <><Eye size={11} /> Preview</>}
+                </button>
+              </div>
+              {descPreview ? (
+                <div className="min-h-[96px] border border-gray-200 rounded-lg p-3 bg-white text-sm text-gray-700 prose prose-sm max-w-none">
+                  {description
+                    ? <ReactMarkdown>{description}</ReactMarkdown>
+                    : <span className="text-gray-400 italic">No description.</span>}
+                </div>
+              ) : (
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  onBlur={handleSaveText}
+                  rows={4}
+                  className="w-full text-sm text-gray-700 resize-y border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 font-mono"
+                  placeholder="Add a description... (supports **markdown**)"
+                />
+              )}
             </div>
 
             {/* Checklist */}
@@ -480,8 +502,8 @@ export default function IssueModal({
                 className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">None</option>
-                {TAGS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                {projectTags.map((t) => (
+                  <option key={t.id} value={t.name}>{t.name}</option>
                 ))}
               </select>
             </Field>

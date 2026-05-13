@@ -517,3 +517,67 @@ export async function syncFromGitHub(
 
   return result;
 }
+
+// ── Velocity Chart ────────────────────────────────────────────────────────────
+
+export interface VelocityPoint {
+  sprint: string;
+  committed: number;  // total story points in sprint
+  completed: number;  // story points with status='done'
+}
+
+export async function getVelocityData(projectId: string): Promise<VelocityPoint[]> {
+  const sprints = await getSprints(projectId);
+  const relevantSprints = sprints
+    .filter((s) => s.status === 'active' || s.status === 'completed')
+    .slice(-8); // last 8 sprints
+
+  const points: VelocityPoint[] = await Promise.all(
+    relevantSprints.map(async (sprint) => {
+      const { data } = await jiraDb
+        .from('issues')
+        .select('story_points, status')
+        .eq('project_id', projectId)
+        .eq('sprint_id', sprint.id)
+        .eq('is_archived', false);
+
+      const issues = (data ?? []) as { story_points: number | null; status: string }[];
+      const committed = issues.reduce((sum, i) => sum + (i.story_points ?? 0), 0);
+      const completed = issues
+        .filter((i) => i.status === 'done')
+        .reduce((sum, i) => sum + (i.story_points ?? 0), 0);
+
+      return { sprint: sprint.name, committed, completed };
+    })
+  );
+
+  return points;
+}
+
+// ── Recurring Issues ──────────────────────────────────────────────────────────
+
+export async function cloneIssueAsNew(
+  issueId: string,
+  projectId: string,
+  projectKey: string,
+  overrides: Partial<Pick<Issue, 'title' | 'sprint_id' | 'due_date'>> = {}
+): Promise<Issue | null> {
+  const original = await getIssue(issueId);
+  if (!original) return null;
+
+  return createIssue({
+    project_id: projectId,
+    project_key: projectKey,
+    title: overrides.title ?? `[Recurring] ${original.title}`,
+    description: original.description ?? undefined,
+    type: original.type,
+    status: 'todo',
+    priority: original.priority,
+    assignee_id: original.assignee_id ?? undefined,
+    sprint_id: overrides.sprint_id ?? undefined,
+    due_date: overrides.due_date ?? undefined,
+    story_points: original.story_points ?? undefined,
+    tag: original.tag ?? undefined,
+    reporter_id: original.reporter_id ?? undefined,
+  });
+}

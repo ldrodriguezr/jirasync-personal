@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GripVertical, Plus, Layers, ChevronDown, ChevronRight, CheckSquare, Square, Trash2 } from 'lucide-react';
-import { getIssues, createIssue, updateIssue, getSprints } from '../lib/db';
+import { GripVertical, Plus, Layers, ChevronDown, ChevronRight, CheckSquare, Square, Trash2, Download, RefreshCw } from 'lucide-react';
+import { getIssues, createIssue, updateIssue, getSprints, cloneIssueAsNew } from '../lib/db';
 import { useApp } from '../context/AppContext';
 import { useRealtimeIssues } from '../hooks/useRealtimeIssues';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { useDueDateNotifications } from '../hooks/useDueDateNotifications';
 import type { Issue, Sprint, IssueType, IssueStatus, Priority } from '../types';
 import { ISSUE_TYPES, ISSUE_STATUSES, PRIORITIES, STATUS_COLORS } from '../types';
 import IssueTypeIcon from '../components/issues/IssueTypeIcon';
@@ -89,13 +90,54 @@ export default function BacklogPage() {
     });
   };
 
-  const moveToSprint = async (issueId: string, sprintId: string | null) => {
+  const moveToSprint = useCallback(async (issueId: string, sprintId: string | null) => {
+    // Optimistic update — update UI immediately before DB call
+    setIssues((prev) =>
+      prev.map((i) =>
+        i.id === issueId
+          ? { ...i, sprint_id: sprintId, status: sprintId ? (i.status === 'backlog' ? 'todo' : i.status) : 'backlog' }
+          : i
+      )
+    );
     await updateIssue(issueId, {
       sprint_id: sprintId,
       status: sprintId ? 'todo' : 'backlog',
     });
-    await load();
-  };
+  }, []);
+
+  // Due date notifications
+  useDueDateNotifications(issues);
+
+  const exportCSV = useCallback(() => {
+    const headers = ['Ticket ID', 'Title', 'Type', 'Status', 'Priority', 'Sprint', 'Story Points', 'Assignee', 'Due Date', 'Tag'];
+    const rows = issues.map((i) => [
+      i.ticket_id,
+      `"${i.title.replace(/"/g, '""')}"`,
+      i.type,
+      i.status,
+      i.priority,
+      sprints.find((s) => s.id === i.sprint_id)?.name ?? 'Backlog',
+      i.story_points ?? '',
+      i.assignee?.full_name ?? i.assignee?.email ?? '',
+      i.due_date ?? '',
+      i.tag ?? '',
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeProject?.key ?? 'issues'}-backlog-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [issues, sprints, activeProject]);
+
+  const handleCloneRecurring = useCallback(async (issueId: string) => {
+    if (!activeProject) return;
+    if (!confirm('Clone this issue as a new recurring task?')) return;
+    await cloneIssueAsNew(issueId, activeProject.id, activeProject.key);
+    load();
+  }, [activeProject, load]);
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -219,6 +261,13 @@ export default function BacklogPage() {
             <option value="">All assignees</option>
             {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
           </select>
+          <button
+            onClick={exportCSV}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            title="Export to CSV"
+          >
+            <Download size={13} /> Export CSV
+          </button>
           <Button onClick={() => setShowCreateModal(true)}>
             <Plus size={16} /> Create Issue
           </Button>
@@ -246,6 +295,7 @@ export default function BacklogPage() {
                 onMoveToSprint={moveToSprint}
                 selected={selectedIds.has(issue.id)}
                 onToggleSelect={toggleSelect}
+                onClone={handleCloneRecurring}
               />
             ))}
           </Section>
@@ -272,6 +322,7 @@ export default function BacklogPage() {
                 onMoveToSprint={moveToSprint}
                 selected={selectedIds.has(issue.id)}
                 onToggleSelect={toggleSelect}
+                onClone={handleCloneRecurring}
               />
             ))}
           </Section>
@@ -294,6 +345,7 @@ export default function BacklogPage() {
               onMoveToSprint={moveToSprint}
                 selected={selectedIds.has(issue.id)}
                 onToggleSelect={toggleSelect}
+                onClone={handleCloneRecurring}
             />
           ))}
           {backlogIssues.length === 0 && (
@@ -416,6 +468,7 @@ function IssueRow({
   onMoveToSprint,
   selected,
   onToggleSelect,
+  onClone,
 }: {
   issue: Issue;
   sprints: Sprint[];
@@ -423,6 +476,7 @@ function IssueRow({
   onMoveToSprint: (id: string, sprintId: string | null) => void;
   selected: boolean;
   onToggleSelect: (id: string) => void;
+  onClone: (id: string) => void;
 }) {
   return (
     <div
@@ -440,6 +494,13 @@ function IssueRow({
       <span className="font-mono text-[11px] text-gray-400 w-16 flex-shrink-0">{issue.ticket_id}</span>
       <span className="flex-1 text-sm text-gray-800 truncate">{issue.title}</span>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={() => onClone(issue.id)}
+          className="text-gray-400 hover:text-green-600 transition-colors p-0.5 rounded"
+          title="Clone as recurring task"
+        >
+          <RefreshCw size={12} />
+        </button>
         <select
           value={issue.sprint_id ?? ''}
           onChange={(e) => onMoveToSprint(issue.id, e.target.value || null)}

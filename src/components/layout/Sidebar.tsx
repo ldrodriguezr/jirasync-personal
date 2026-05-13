@@ -36,7 +36,7 @@ export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void 
         <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center">
           <span className="text-white font-bold text-sm">J</span>
         </div>
-        <span className="text-white font-bold tracking-wide text-sm">JiraSync</span>
+        <span className="text-white font-bold tracking-wide text-sm">MyTask</span>
       </div>
 
       {/* Command palette trigger */}

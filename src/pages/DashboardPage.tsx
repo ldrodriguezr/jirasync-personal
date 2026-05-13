@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { TrendingUp, CheckCircle2, Clock, AlertCircle, Users, LayoutDashboard } from 'lucide-react';
 import { format, startOfWeek, isAfter, isBefore, parseISO } from 'date-fns';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { getIssueStats, getSprints, getBurndownData, type BurndownPoint } from '../lib/db';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { getIssueStats, getSprints, getBurndownData, getVelocityData, type BurndownPoint, type VelocityPoint } from '../lib/db';
 import { useApp } from '../context/AppContext';
 import type { Sprint } from '../types';
 import { PRIORITIES, TYPE_COLORS } from '../types';
@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [burndown, setBurndown] = useState<BurndownPoint[]>([]);
   const [selectedSprintId, setSelectedSprintId] = useState<string>('');
+  const [velocity, setVelocity] = useState<VelocityPoint[]>([]);
 
   const load = useCallback(async () => {
     if (!activeProject) return;
@@ -35,6 +36,8 @@ export default function DashboardPage() {
     ]);
     setStats(s as StatRow[]);
     setSprints(spr);
+    // Velocity chart
+    getVelocityData(activeProject.id).then(setVelocity).catch(console.error);
     // Auto-select active sprint for burndown
     const active = spr.find((sp: Sprint) => sp.status === 'active');
     if (active) {
@@ -271,6 +274,29 @@ export default function DashboardPage() {
               {selectedSprintId ? 'No story points data for this sprint.' : 'Select a sprint to view its burndown.'}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Velocity Chart */}
+      {velocity.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-700">Velocity</h2>
+              <p className="text-xs text-gray-400 mt-0.5">Story points committed vs completed per sprint</p>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={velocity} margin={{ top: 4, right: 16, left: -10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="sprint" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(val, name) => [val, name === 'committed' ? 'Committed' : 'Completed']} />
+              <Legend formatter={(v) => v === 'committed' ? 'Committed' : 'Completed'} />
+              <Bar dataKey="committed" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="completed" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>

@@ -4,7 +4,7 @@ import {
   Send, ExternalLink, Eye, Pencil,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import ReactMarkdown from 'react-markdown';
+import { marked } from 'marked';
 import {
   getIssue, updateIssue, deleteIssue, archiveIssue,
   addChecklist, toggleChecklist, deleteChecklist,
@@ -211,11 +211,14 @@ export default function IssueModal({
                 </button>
               </div>
               {descPreview ? (
-                <div className="min-h-[96px] border border-gray-200 rounded-lg p-3 bg-white text-sm text-gray-700 prose prose-sm max-w-none">
-                  {description
-                    ? <ReactMarkdown>{description}</ReactMarkdown>
-                    : <span className="text-gray-400 italic">No description.</span>}
-                </div>
+                <div
+                  className="min-h-[96px] border border-gray-200 rounded-lg p-3 bg-white text-sm text-gray-700 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{
+                    __html: description
+                      ? marked.parse(description) as string
+                      : '<span class="text-gray-400 italic">No description.</span>',
+                  }}
+                />
               ) : (
                 <textarea
                   value={description}

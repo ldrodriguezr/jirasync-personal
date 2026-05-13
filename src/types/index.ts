@@ -198,3 +198,37 @@ export const TYPE_COLORS: Record<IssueType, string> = {
   bug: 'text-red-600',
   subtask: 'text-sky-500',
 };
+
+// ── Tier 1 Types ──────────────────────────────────────────────────────────────
+
+export interface TimeEntry {
+  id: string;
+  issue_id: string;
+  user_id: string;
+  started_at: string;
+  stopped_at: string | null;
+  duration_secs: number | null;
+  note: string | null;
+  created_at: string;
+  actor_name?: string;
+}
+
+export interface IssueDependency {
+  id: string;
+  issue_id: string;
+  depends_on_id: string;
+  depends_on?: Issue;
+  created_at: string;
+}
+
+export interface ActivityItem {
+  id: string;
+  project_id: string;
+  issue_id: string | null;
+  user_id: string | null;
+  actor_name: string;
+  action: string;
+  detail: string | null;
+  created_at: string;
+  issue?: { ticket_id: string; title: string } | null;
+}

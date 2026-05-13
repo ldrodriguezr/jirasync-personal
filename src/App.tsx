@@ -9,6 +9,9 @@ import SprintsPage from './pages/SprintsPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CalendarPage from './pages/CalendarPage';
+import GanttPage from './pages/GanttPage';
+import WorkloadPage from './pages/WorkloadPage';
+import ActivityPage from './pages/ActivityPage';
 
 function AppRoutes() {
   const { user, loading } = useApp();
@@ -43,6 +46,9 @@ function AppRoutes() {
         <Route path="/backlog" element={<BacklogPage />} />
         <Route path="/sprints" element={<SprintsPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/gantt" element={<GanttPage />} />
+        <Route path="/workload" element={<WorkloadPage />} />
+        <Route path="/activity" element={<ActivityPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="*" element={<Navigate to="/board" replace />} />

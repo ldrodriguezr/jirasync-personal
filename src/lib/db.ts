@@ -581,3 +581,133 @@ export async function cloneIssueAsNew(
     reporter_id: original.reporter_id ?? undefined,
   });
 }
+
+// ── Time Tracking ─────────────────────────────────────────────────────────────
+
+import type { TimeEntry, IssueDependency, ActivityItem } from '../types';
+
+export async function getTimeEntries(issueId: string): Promise<TimeEntry[]> {
+  const { data } = await jiraDb
+    .from('time_entries')
+    .select('*')
+    .eq('issue_id', issueId)
+    .order('started_at', { ascending: false });
+  return (data as TimeEntry[]) ?? [];
+}
+
+export async function startTimer(issueId: string, userId: string): Promise<TimeEntry | null> {
+  // Stop any running timer for this user first
+  await jiraDb
+    .from('time_entries')
+    .update({ stopped_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .is('stopped_at', null);
+
+  const { data } = await jiraDb
+    .from('time_entries')
+    .insert({ issue_id: issueId, user_id: userId, started_at: new Date().toISOString() })
+    .select()
+    .single();
+  return data as TimeEntry | null;
+}
+
+export async function stopTimer(issueId: string, userId: string, note?: string): Promise<void> {
+  const { data: running } = await jiraDb
+    .from('time_entries')
+    .select('*')
+    .eq('issue_id', issueId)
+    .eq('user_id', userId)
+    .is('stopped_at', null)
+    .single();
+
+  if (!running) return;
+  const stoppedAt = new Date();
+  const startedAt = new Date((running as TimeEntry).started_at);
+  const durationSecs = Math.round((stoppedAt.getTime() - startedAt.getTime()) / 1000);
+
+  await jiraDb
+    .from('time_entries')
+    .update({ stopped_at: stoppedAt.toISOString(), duration_secs: durationSecs, note: note ?? null })
+    .eq('id', (running as TimeEntry).id);
+}
+
+export async function getRunningTimer(issueId: string, userId: string): Promise<TimeEntry | null> {
+  const { data } = await jiraDb
+    .from('time_entries')
+    .select('*')
+    .eq('issue_id', issueId)
+    .eq('user_id', userId)
+    .is('stopped_at', null)
+    .maybeSingle();
+  return data as TimeEntry | null;
+}
+
+export async function logManualTime(issueId: string, userId: string, durationSecs: number, note?: string): Promise<void> {
+  const now = new Date();
+  const started = new Date(now.getTime() - durationSecs * 1000);
+  await jiraDb.from('time_entries').insert({
+    issue_id: issueId,
+    user_id: userId,
+    started_at: started.toISOString(),
+    stopped_at: now.toISOString(),
+    duration_secs: durationSecs,
+    note: note ?? null,
+  });
+}
+
+export async function deleteTimeEntry(id: string): Promise<void> {
+  await jiraDb.from('time_entries').delete().eq('id', id);
+}
+
+export function formatDuration(secs: number): string {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
+// ── Task Dependencies ─────────────────────────────────────────────────────────
+
+export async function getDependencies(issueId: string): Promise<IssueDependency[]> {
+  const { data } = await jiraDb
+    .from('issue_dependencies')
+    .select('*, depends_on:depends_on_id(id, ticket_id, title, status, type)')
+    .eq('issue_id', issueId);
+  return (data as IssueDependency[]) ?? [];
+}
+
+export async function addDependency(issueId: string, dependsOnId: string): Promise<void> {
+  await jiraDb.from('issue_dependencies').upsert(
+    { issue_id: issueId, depends_on_id: dependsOnId },
+    { onConflict: 'issue_id,depends_on_id' }
+  );
+}
+
+export async function removeDependency(id: string): Promise<void> {
+  await jiraDb.from('issue_dependencies').delete().eq('id', id);
+}
+
+// ── Activity Feed ─────────────────────────────────────────────────────────────
+
+export async function getActivityFeed(projectId: string, limit = 50): Promise<ActivityItem[]> {
+  const { data } = await jiraDb
+    .from('activity_feed')
+    .select('*, issue:issue_id(ticket_id, title)')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  return (data as ActivityItem[]) ?? [];
+}
+
+export async function logActivity(payload: {
+  project_id: string;
+  issue_id?: string;
+  user_id?: string;
+  actor_name: string;
+  action: string;
+  detail?: string;
+}): Promise<void> {
+  await jiraDb.from('activity_feed').insert(payload);
+}

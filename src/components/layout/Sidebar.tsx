@@ -1,16 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Layers,
-  List,
-  Zap,
-  FolderOpen,
-  LogOut,
-  ChevronDown,
-  Plus,
-  Calendar,
-  Search,
+  LayoutDashboard, Layers, List, Zap, FolderOpen, LogOut,
+  ChevronDown, Plus, Calendar, Search, BarChart2, Users, Activity,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import Avatar from '../ui/Avatar';
@@ -20,6 +12,9 @@ const NAV = [
   { to: '/backlog',   label: 'Backlog',    Icon: List },
   { to: '/sprints',   label: 'Sprints',    Icon: Zap },
   { to: '/calendar',  label: 'Calendar',   Icon: Calendar },
+  { to: '/gantt',     label: 'Gantt',      Icon: BarChart2 },
+  { to: '/workload',  label: 'Workload',   Icon: Users },
+  { to: '/activity',  label: 'Activity',   Icon: Activity },
   { to: '/dashboard', label: 'Dashboard',  Icon: LayoutDashboard },
   { to: '/projects',  label: 'Projects',   Icon: FolderOpen },
 ];

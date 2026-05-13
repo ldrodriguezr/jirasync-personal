@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   X, Trash2, Archive, ArchiveRestore, Plus, Link as LinkIcon,
-  Send, ExternalLink, Eye, Pencil,
+  Send, ExternalLink, Eye, Pencil, Play, Square, Clock, GitBranch,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { marked } from 'marked';
@@ -9,9 +9,13 @@ import {
   getIssue, updateIssue, deleteIssue, archiveIssue,
   addChecklist, toggleChecklist, deleteChecklist,
   addLink, deleteLink, addComment,
+  getTimeEntries, logManualTime, deleteTimeEntry, formatDuration,
+  getDependencies, addDependency, removeDependency,
+  logActivity,
 } from '../../lib/db';
+import { useTimeTracker } from '../../hooks/useTimeTracker';
 import { useApp } from '../../context/AppContext';
-import type { Issue, IssueType, IssueStatus, Priority, Profile, Sprint } from '../../types';
+import type { Issue, IssueType, IssueStatus, Priority, Profile, Sprint, TimeEntry, IssueDependency } from '../../types';
 import {
   ISSUE_TYPES, ISSUE_STATUSES, PRIORITIES, STORY_POINTS,
   STATUS_COLORS,
@@ -40,7 +44,7 @@ export default function IssueModal({
   onDeleted,
   onUpdated,
 }: IssueModalProps) {
-  const { projectTags } = useApp();
+  const { projectTags, activeProject } = useApp();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [saving, setSaving] = useState(false);
   const [newCheckText, setNewCheckText] = useState('');
@@ -50,6 +54,17 @@ export default function IssueModal({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [descPreview, setDescPreview] = useState(false);
+  // Time tracking
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+  const [manualMins, setManualMins] = useState('');
+  const [manualNote, setManualNote] = useState('');
+  const timer = useTimeTracker(issueId, currentUser.id);
+  // Dependencies
+  const [deps, setDeps] = useState<IssueDependency[]>([]);
+  const [depTicketId, setDepTicketId] = useState('');
+  // @mentions in comments
+  const [mentionSuggestions, setMentionSuggestions] = useState<Profile[]>([]);
+  const commentRef = useRef<HTMLTextAreaElement>(null);
 
   const loadIssue = async () => {
     const data = await getIssue(issueId);
@@ -58,6 +73,12 @@ export default function IssueModal({
       setTitle(data.title);
       setDescription(data.description ?? '');
     }
+    const [entries, dependencies] = await Promise.all([
+      getTimeEntries(issueId),
+      getDependencies(issueId),
+    ]);
+    setTimeEntries(entries);
+    setDeps(dependencies);
   };
 
   useEffect(() => { loadIssue(); }, [issueId]);
@@ -106,6 +127,97 @@ export default function IssueModal({
     await addChecklist(issue.id, newCheckText.trim());
     setNewCheckText('');
     await loadIssue();
+  };
+
+  // Time tracking handlers
+  const handleLogManual = async () => {
+    const mins = parseFloat(manualMins);
+    if (!mins || mins <= 0) return;
+    await logManualTime(issue.id, currentUser.id, Math.round(mins * 60), manualNote || undefined);
+    if (activeProject) {
+      await logActivity({
+        project_id: activeProject.id, issue_id: issue.id,
+        actor_name: currentUser.full_name ?? currentUser.email,
+        action: 'time_logged',
+        detail: `logged ${mins}m on "${issue.title}"`,
+      });
+    }
+    setManualMins(''); setManualNote('');
+    const entries = await getTimeEntries(issueId);
+    setTimeEntries(entries);
+  };
+
+  const handleDeleteEntry = async (id: string) => {
+    await deleteTimeEntry(id);
+    const entries = await getTimeEntries(issueId);
+    setTimeEntries(entries);
+  };
+
+  const handleTimerToggle = async () => {
+    if (timer.running) {
+      await timer.stop();
+      if (activeProject) {
+        await logActivity({
+          project_id: activeProject.id, issue_id: issue.id,
+          actor_name: currentUser.full_name ?? currentUser.email,
+          action: 'time_logged',
+          detail: `logged ${timer.elapsedFormatted} on "${issue.title}"`,
+        });
+      }
+      const entries = await getTimeEntries(issueId);
+      setTimeEntries(entries);
+    } else {
+      await timer.start();
+    }
+  };
+
+  // Dependencies
+  const handleAddDep = async () => {
+    if (!depTicketId.trim() || !activeProject) return;
+    // Find issue by ticket_id (search in loaded issues via project)
+    const { getIssues } = await import('../../lib/db');
+    const all = await getIssues(activeProject.id, { includeArchived: false });
+    const found = all.find((i) => i.ticket_id.toLowerCase() === depTicketId.trim().toLowerCase());
+    if (!found) { alert(`Issue "${depTicketId}" not found`); return; }
+    if (found.id === issue.id) { alert('Cannot depend on itself'); return; }
+    await addDependency(issue.id, found.id);
+    setDepTicketId('');
+    const d = await getDependencies(issueId);
+    setDeps(d);
+  };
+
+  const handleRemoveDep = async (depId: string) => {
+    await removeDependency(depId);
+    const d = await getDependencies(issueId);
+    setDeps(d);
+  };
+
+  // @mentions in comment textarea
+  const handleCommentChange = (val: string) => {
+    setNewComment(val);
+    const at = val.lastIndexOf('@');
+    if (at !== -1 && at === val.length - 1) {
+      setMentionSuggestions(profiles.slice(0, 5));
+    } else if (at !== -1) {
+      const query = val.slice(at + 1).toLowerCase();
+      if (!query.includes(' ')) {
+        setMentionSuggestions(profiles.filter((p) =>
+          (p.full_name ?? p.email).toLowerCase().includes(query)
+        ).slice(0, 5));
+      } else {
+        setMentionSuggestions([]);
+      }
+    } else {
+      setMentionSuggestions([]);
+    }
+  };
+
+  const insertMention = (profile: Profile) => {
+    const at = newComment.lastIndexOf('@');
+    const mention = `@${profile.full_name ?? profile.email} `;
+    setNewComment(newComment.slice(0, at) + mention);
+    setMentionSuggestions([]);
+    commentRef.current?.focus();
   };
 
   const handleToggleCheck = async (id: string, current: boolean) => {
@@ -352,6 +464,78 @@ export default function IssueModal({
               </div>
             </div>
 
+            {/* ── Time Tracking ───────────────────────────────── */}
+            <div className="border border-gray-100 rounded-xl p-4 space-y-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                <Clock size={12} /> Time Tracking
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleTimerToggle}
+                  disabled={timer.loading}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    timer.running ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-green-500 hover:bg-green-600 text-white'
+                  }`}
+                >
+                  {timer.running ? <Square size={11} /> : <Play size={11} />}
+                  {timer.running ? `Stop (${timer.elapsedFormatted})` : 'Start Timer'}
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input type="number" value={manualMins} onChange={(e) => setManualMins(e.target.value)}
+                  placeholder="mins" className="w-16 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <input value={manualNote} onChange={(e) => setManualNote(e.target.value)}
+                  placeholder="Note (optional)" className="flex-1 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <button onClick={handleLogManual} disabled={!manualMins}
+                  className="text-xs bg-gray-800 text-white px-2.5 py-1.5 rounded hover:bg-gray-700 disabled:opacity-40">Log</button>
+              </div>
+              {timeEntries.filter((e) => e.stopped_at).length > 0 && (
+                <div className="space-y-1">
+                  {timeEntries.filter((e) => e.stopped_at).map((entry) => (
+                    <div key={entry.id} className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded px-2 py-1 group">
+                      <span className="font-medium text-gray-700">{formatDuration(entry.duration_secs ?? 0)}</span>
+                      {entry.note && <span className="truncate text-gray-400">{entry.note}</span>}
+                      <span className="ml-auto text-gray-300 text-[10px]">{format(new Date(entry.started_at), 'MMM d')}</span>
+                      <button onClick={() => handleDeleteEntry(entry.id)} className="opacity-0 group-hover:opacity-100 text-red-400">×</button>
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-gray-400 text-right font-medium">
+                    Total: {formatDuration(timeEntries.filter((e) => e.stopped_at).reduce((s, e) => s + (e.duration_secs ?? 0), 0))}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* ── Dependencies ─────────────────────────────────── */}
+            <div className="border border-gray-100 rounded-xl p-4 space-y-3">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                <GitBranch size={12} /> Blocked By
+              </p>
+              <div className="flex gap-2">
+                <input value={depTicketId} onChange={(e) => setDepTicketId(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddDep(); }}
+                  placeholder="Ticket ID (e.g. PROJ-42)"
+                  className="flex-1 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <button onClick={handleAddDep} disabled={!depTicketId.trim()}
+                  className="text-xs bg-gray-800 text-white px-2.5 py-1.5 rounded hover:bg-gray-700 disabled:opacity-40">Add</button>
+              </div>
+              {deps.length > 0 ? (
+                <div className="space-y-1">
+                  {deps.map((dep) => (
+                    <div key={dep.id} className="flex items-center gap-2 text-xs bg-gray-50 rounded px-2 py-1.5 group">
+                      <IssueTypeIcon type={(dep.depends_on as Issue)?.type ?? 'task'} size={11} />
+                      <span className="font-mono text-gray-400 text-[11px]">{(dep.depends_on as Issue)?.ticket_id}</span>
+                      <span className="flex-1 truncate text-gray-600">{(dep.depends_on as Issue)?.title}</span>
+                      <span className={`text-[10px] px-1 py-0.5 rounded ${STATUS_COLORS[(dep.depends_on as Issue)?.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                        {(dep.depends_on as Issue)?.status?.replace('_', ' ')}
+                      </span>
+                      <button onClick={() => handleRemoveDep(dep.id)} className="opacity-0 group-hover:opacity-100 text-red-400">×</button>
+                    </div>
+                  ))}
+                </div>
+              ) : <p className="text-xs text-gray-400">No dependencies</p>}
+            </div>
+
             {/* Activity / Comments */}
             <div>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Activity</p>
@@ -376,14 +560,26 @@ export default function IssueModal({
               </div>
               <div className="flex gap-2">
                 <Avatar name={currentUser.full_name ?? currentUser.email} size="xs" />
-                <div className="flex-1 flex gap-2">
+                <div className="flex-1 flex gap-2 relative">
                   <textarea
+                    ref={commentRef}
                     value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
+                    onChange={(e) => handleCommentChange(e.target.value)}
+                    placeholder="Add a comment... (@ to mention)"
                     rows={2}
                     className="flex-1 text-sm border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
+                  {mentionSuggestions.length > 0 && (
+                    <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 w-52 overflow-hidden">
+                      {mentionSuggestions.map((p) => (
+                        <button key={p.id} onClick={() => insertMention(p)}
+                          className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-50 text-sm text-left">
+                          <Avatar name={p.full_name ?? p.email} size="xs" />
+                          <span>{p.full_name ?? p.email}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <button
                     onClick={handleAddComment}
                     className="self-end p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"

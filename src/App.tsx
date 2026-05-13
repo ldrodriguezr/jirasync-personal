@@ -8,6 +8,7 @@ import BacklogPage from './pages/BacklogPage';
 import SprintsPage from './pages/SprintsPage';
 import DashboardPage from './pages/DashboardPage';
 import ProjectsPage from './pages/ProjectsPage';
+import CalendarPage from './pages/CalendarPage';
 
 function AppRoutes() {
   const { user, loading } = useApp();
@@ -41,6 +42,7 @@ function AppRoutes() {
         <Route path="/board" element={<BoardPage />} />
         <Route path="/backlog" element={<BacklogPage />} />
         <Route path="/sprints" element={<SprintsPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
         <Route path="*" element={<Navigate to="/board" replace />} />

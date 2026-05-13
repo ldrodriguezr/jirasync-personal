@@ -9,6 +9,8 @@ import {
   LogOut,
   ChevronDown,
   Plus,
+  Calendar,
+  Search,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import Avatar from '../ui/Avatar';
@@ -17,11 +19,12 @@ const NAV = [
   { to: '/board',     label: 'Board',      Icon: Layers },
   { to: '/backlog',   label: 'Backlog',    Icon: List },
   { to: '/sprints',   label: 'Sprints',    Icon: Zap },
+  { to: '/calendar',  label: 'Calendar',   Icon: Calendar },
   { to: '/dashboard', label: 'Dashboard',  Icon: LayoutDashboard },
   { to: '/projects',  label: 'Projects',   Icon: FolderOpen },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void }) {
   const { user, activeProject, projects, setActiveProject, signOut } = useApp();
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -34,6 +37,18 @@ export default function Sidebar() {
           <span className="text-white font-bold text-sm">J</span>
         </div>
         <span className="text-white font-bold tracking-wide text-sm">JiraSync</span>
+      </div>
+
+      {/* Command palette trigger */}
+      <div className="px-3 mb-1">
+        <button
+          onClick={onOpenPalette}
+          className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md bg-sidebar-hover hover:bg-sidebar-active text-gray-400 hover:text-white text-xs transition-colors"
+        >
+          <Search size={12} />
+          <span className="flex-1 text-left">Search...</span>
+          <kbd className="text-[9px] bg-black/20 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+        </button>
       </div>
 
       {/* Project selector */}

@@ -64,7 +64,10 @@ export default function BoardPage() {
   const [filterPriority, setFilterPriority] = useState('');
   const [search, setSearch] = useState('');
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [quickAddCol, setQuickAddCol] = useState<IssueStatus | null>(null);
+  const [quickAddTitle, setQuickAddTitle] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
+  const quickAddRef = useRef<HTMLTextAreaElement>(null);
 
   const load = useCallback(async () => {
     if (!activeProject) return;
@@ -78,7 +81,27 @@ export default function BoardPage() {
     setLoading(false);
   }, [activeProject, showArchived]);
 
-  useEffect(() => { load(); }, [load]);
+  const handleQuickAdd = useCallback(async (status: IssueStatus) => {
+    if (!quickAddTitle.trim() || !activeProject || !user) return;
+    await createIssue({
+      project_id: activeProject.id,
+      project_key: activeProject.key,
+      title: quickAddTitle.trim(),
+      type: 'task',
+      status,
+      priority: 'medium',
+      reporter_id: user.id,
+    });
+    setQuickAddTitle('');
+    setQuickAddCol(null);
+    load();
+  }, [quickAddTitle, activeProject, user, load]);
+
+  const openQuickAdd = useCallback((status: IssueStatus) => {
+    setQuickAddCol(status);
+    setQuickAddTitle('');
+    setTimeout(() => quickAddRef.current?.focus(), 30);
+  }, []);
 
   // Real-time: auto-refresh when any issue changes in this project
   useRealtimeIssues(activeProject?.id ?? null, load);
@@ -260,16 +283,51 @@ export default function BoardPage() {
                           </Draggable>
                         ))}
                         {provided.placeholder}
-                        {/* Quick add */}
-                        <button
-                          onClick={() => {
-                            setCreateForm((f) => ({ ...f, status }));
-                            setShowCreateModal(true);
-                          }}
-                          className="w-full mt-1 flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 py-1.5 px-2 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                          <Plus size={13} /> Add issue
-                        </button>
+
+                        {/* Inline quick-add */}
+                        {quickAddCol === status ? (
+                          <div className="mt-1 bg-white rounded-lg border border-blue-300 shadow-sm p-2">
+                            <textarea
+                              ref={quickAddRef}
+                              value={quickAddTitle}
+                              onChange={(e) => setQuickAddTitle(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleQuickAdd(status);
+                                } else if (e.key === 'Escape') {
+                                  setQuickAddCol(null);
+                                  setQuickAddTitle('');
+                                }
+                              }}
+                              placeholder="Issue title... (Enter to create, Esc to cancel)"
+                              rows={2}
+                              className="w-full text-sm resize-none outline-none text-gray-800 placeholder-gray-400"
+                            />
+                            <div className="flex items-center justify-end gap-2 mt-1.5">
+                              <button
+                                onClick={() => { setQuickAddCol(null); setQuickAddTitle(''); }}
+                                className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleQuickAdd(status)}
+                                disabled={!quickAddTitle.trim()}
+                                className="text-xs bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 disabled:opacity-40 transition-colors"
+                              >
+                                Create
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => openQuickAdd(status)}
+                            className="w-full mt-1 flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 py-1.5 px-2 rounded-lg hover:bg-gray-200 transition-colors"
+                          >
+                            <Plus size={13} /> Add issue
+                          </button>
+                        )}
                       </div>
                     )}
                   </Droppable>

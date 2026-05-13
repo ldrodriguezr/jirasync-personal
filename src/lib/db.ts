@@ -370,3 +370,150 @@ export async function createProjectTag(
 export async function deleteProjectTag(id: string): Promise<void> {
   await jiraDb.from('project_tags').delete().eq('id', id);
 }
+
+// ── GitHub Sync ───────────────────────────────────────────────────────────────
+
+export interface GitHubSettings {
+  id: string;
+  project_id: string;
+  owner: string;
+  repo: string;
+  token: string;
+  sync_prs: boolean;
+  sync_issues: boolean;
+  default_type: string;
+  last_synced_at: string | null;
+}
+
+export async function getGitHubSettings(projectId: string): Promise<GitHubSettings | null> {
+  const { data } = await jiraDb
+    .from('github_settings')
+    .select('*')
+    .eq('project_id', projectId)
+    .maybeSingle();
+  return data as GitHubSettings | null;
+}
+
+export async function upsertGitHubSettings(
+  projectId: string,
+  payload: Partial<Omit<GitHubSettings, 'id' | 'project_id'>>
+): Promise<void> {
+  await jiraDb.from('github_settings').upsert(
+    { project_id: projectId, ...payload, updated_at: new Date().toISOString() },
+    { onConflict: 'project_id' }
+  );
+}
+
+interface GitHubSyncItem {
+  github_number: number;
+  github_type: 'pr' | 'issue';
+}
+
+export async function getSyncedItems(projectId: string): Promise<GitHubSyncItem[]> {
+  const { data } = await jiraDb
+    .from('github_sync_items')
+    .select('github_number, github_type')
+    .eq('project_id', projectId);
+  return (data as GitHubSyncItem[]) ?? [];
+}
+
+export async function markItemSynced(
+  projectId: string,
+  githubNumber: number,
+  githubType: 'pr' | 'issue',
+  issueId: string
+): Promise<void> {
+  await jiraDb.from('github_sync_items').upsert(
+    { project_id: projectId, github_number: githubNumber, github_type: githubType, issue_id: issueId },
+    { onConflict: 'project_id,github_number,github_type' }
+  );
+}
+
+export interface SyncResult {
+  created: number;
+  skipped: number;
+  errors: string[];
+}
+
+/**
+ * Fetches open PRs (and optionally issues) from GitHub and creates
+ * corresponding issues in the project if they haven't been synced yet.
+ */
+export async function syncFromGitHub(
+  projectId: string,
+  settings: GitHubSettings
+): Promise<SyncResult> {
+  const result: SyncResult = { created: 0, skipped: 0, errors: [] };
+  const headers: HeadersInit = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+    ...(settings.token ? { Authorization: `Bearer ${settings.token}` } : {}),
+  };
+
+  const synced = await getSyncedItems(projectId);
+  const syncedSet = new Set(synced.map((s) => `${s.github_type}-${s.github_number}`));
+
+  const fetchItems = async (type: 'pr' | 'issue') => {
+    const endpoint =
+      type === 'pr'
+        ? `https://api.github.com/repos/${settings.owner}/${settings.repo}/pulls?state=open&per_page=50`
+        : `https://api.github.com/repos/${settings.owner}/${settings.repo}/issues?state=open&per_page=50&filter=all`;
+
+    const res = await fetch(endpoint, { headers });
+    if (!res.ok) {
+      result.errors.push(`GitHub API error (${type}): ${res.status} ${res.statusText}`);
+      return;
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items: any[] = await res.json();
+
+    for (const item of items) {
+      const key = `${type}-${item.number}`;
+      if (syncedSet.has(key)) { result.skipped++; continue; }
+
+      // Skip PRs that came back from issues endpoint
+      if (type === 'issue' && item.pull_request) { result.skipped++; continue; }
+
+      const title = `[GH-${item.number}] ${item.title}`;
+      const description =
+        `**GitHub ${type === 'pr' ? 'Pull Request' : 'Issue'} #${item.number}**\n\n` +
+        `${item.body ?? '_No description provided._'}\n\n` +
+        `🔗 [View on GitHub](${item.html_url})`;
+
+      // Get project key for ticket ID generation
+      const { data: projectData } = await jiraDb
+        .from('projects')
+        .select('key')
+        .eq('id', projectId)
+        .single();
+      const projectKey = (projectData as { key: string } | null)?.key ?? 'PROJ';
+
+      const created = await createIssue({
+        project_id: projectId,
+        project_key: projectKey,
+        title,
+        description,
+        type: settings.default_type as Issue['type'],
+        status: 'todo',
+        priority: 'medium',
+        tag: 'GitHub',
+      });
+
+      if (created) {
+        await markItemSynced(projectId, item.number, type, created.id);
+        result.created++;
+      }
+    }
+  };
+
+  if (settings.sync_prs) await fetchItems('pr');
+  if (settings.sync_issues) await fetchItems('issue');
+
+  // Update last_synced_at
+  await jiraDb
+    .from('github_settings')
+    .update({ last_synced_at: new Date().toISOString() })
+    .eq('project_id', projectId);
+
+  return result;
+}

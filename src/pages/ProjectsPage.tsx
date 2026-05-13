@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, FolderOpen, Tag, X } from 'lucide-react';
-import { createProject, updateProject, deleteProject, getProjectTags, createProjectTag, deleteProjectTag } from '../lib/db';
+import { Plus, Pencil, Trash2, FolderOpen, Tag, X, Github, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { createProject, updateProject, deleteProject, getProjectTags, createProjectTag, deleteProjectTag, getGitHubSettings, upsertGitHubSettings, syncFromGitHub, type GitHubSettings, type SyncResult } from '../lib/db';
 import { useApp } from '../context/AppContext';
 import type { ProjectTag } from '../types';
 import Button from '../components/ui/Button';
@@ -31,6 +31,11 @@ export default function ProjectsPage() {
   const [tags, setTags] = useState<ProjectTag[]>([]);
   const [newTagName, setNewTagName] = useState('');
   const [tagLoading, setTagLoading] = useState(false);
+  // GitHub sync
+  const [ghProjectId, setGhProjectId] = useState<string | null>(null);
+  const [ghSettings, setGhSettings] = useState<Partial<GitHubSettings>>({ sync_prs: true, sync_issues: false, default_type: 'task' });
+  const [ghSyncing, setGhSyncing] = useState(false);
+  const [ghResult, setGhResult] = useState<SyncResult | null>(null);
 
   const openCreate = () => { setEditingId(null); setForm(defaultForm); setShowModal(true); };
   const openEdit = (id: string) => {
@@ -77,6 +82,31 @@ export default function ProjectsPage() {
     const t = await getProjectTags(projectId);
     setTags(t);
     setNewTagName('');
+  };
+
+  const openGitHubSync = async (projectId: string) => {
+    setGhProjectId(projectId);
+    setGhResult(null);
+    const existing = await getGitHubSettings(projectId);
+    setGhSettings(existing ?? { sync_prs: true, sync_issues: false, default_type: 'task' });
+  };
+
+  const handleGitHubSave = async () => {
+    if (!ghProjectId || !ghSettings.owner || !ghSettings.repo) return;
+    await upsertGitHubSettings(ghProjectId, ghSettings);
+  };
+
+  const handleGitHubSync = async () => {
+    if (!ghProjectId || !ghSettings.owner || !ghSettings.repo) return;
+    setGhSyncing(true);
+    setGhResult(null);
+    await upsertGitHubSettings(ghProjectId, ghSettings);
+    const full = await getGitHubSettings(ghProjectId);
+    if (full) {
+      const res = await syncFromGitHub(ghProjectId, full);
+      setGhResult(res);
+    }
+    setGhSyncing(false);
   };
 
   const handleAddTag = async () => {
@@ -160,6 +190,12 @@ export default function ProjectsPage() {
                   className="flex items-center gap-1 text-xs text-gray-500 hover:text-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition-colors"
                 >
                   <Tag size={12} /> Tags
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); openGitHubSync(p.id); }}
+                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+                >
+                  <Github size={12} /> GitHub
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(p.id, p.name); }}
@@ -290,6 +326,93 @@ export default function ProjectsPage() {
             <Button type="submit" loading={loading}>{editingId ? 'Save Changes' : 'Create Project'}</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* GitHub Sync Modal */}
+      <Modal open={!!ghProjectId} onClose={() => { setGhProjectId(null); setGhResult(null); }} title="GitHub Sync" size="md">
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-gray-500">
+            Sync open PRs and issues from a GitHub repository as Jira issues in <strong>{projects.find((p) => p.id === ghProjectId)?.name}</strong>.
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Owner / Org</label>
+              <input
+                value={ghSettings.owner ?? ''}
+                onChange={(e) => setGhSettings((s) => ({ ...s, owner: e.target.value }))}
+                placeholder="e.g. ldrodriguezr"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 mb-1">Repository</label>
+              <input
+                value={ghSettings.repo ?? ''}
+                onChange={(e) => setGhSettings((s) => ({ ...s, repo: e.target.value }))}
+                placeholder="e.g. jirasync-personal"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">GitHub Token <span className="font-normal text-gray-400">(optional for private repos)</span></label>
+            <input
+              type="password"
+              value={ghSettings.token ?? ''}
+              onChange={(e) => setGhSettings((s) => ({ ...s, token: e.target.value }))}
+              placeholder="ghp_..."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={ghSettings.sync_prs ?? true}
+                onChange={(e) => setGhSettings((s) => ({ ...s, sync_prs: e.target.checked }))}
+                className="rounded"
+              />
+              Sync open PRs
+            </label>
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
+              <input
+                type="checkbox"
+                checked={ghSettings.sync_issues ?? false}
+                onChange={(e) => setGhSettings((s) => ({ ...s, sync_issues: e.target.checked }))}
+                className="rounded"
+              />
+              Sync open issues
+            </label>
+          </div>
+
+          {ghResult && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-sm ${ghResult.errors.length > 0 ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+              {ghResult.errors.length > 0
+                ? <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                : <CheckCircle2 size={16} className="flex-shrink-0 mt-0.5" />}
+              <div>
+                <p className="font-medium">{ghResult.created} issue{ghResult.created !== 1 ? 's' : ''} created · {ghResult.skipped} skipped</p>
+                {ghResult.errors.map((e, i) => <p key={i} className="text-xs mt-0.5">{e}</p>)}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <Button onClick={handleGitHubSave} variant="secondary">
+              Save settings
+            </Button>
+            <Button
+              onClick={handleGitHubSync}
+              loading={ghSyncing}
+              disabled={!ghSettings.owner || !ghSettings.repo}
+            >
+              <RefreshCw size={14} /> {ghSyncing ? 'Syncing...' : 'Sync now'}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

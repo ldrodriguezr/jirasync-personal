@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { GripVertical, Plus, Layers, ChevronDown, ChevronRight } from 'lucide-react';
+import { GripVertical, Plus, Layers, ChevronDown, ChevronRight, CheckSquare, Square, Trash2 } from 'lucide-react';
 import { getIssues, createIssue, updateIssue, getSprints } from '../lib/db';
 import { useApp } from '../context/AppContext';
 import { useRealtimeIssues } from '../hooks/useRealtimeIssues';
@@ -35,6 +35,7 @@ export default function BacklogPage() {
   const [filterType, setFilterType] = useState('');
   const [filterAssignee, setFilterAssignee] = useState('');
   const [search, setSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const searchRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -96,6 +97,36 @@ export default function BacklogPage() {
     await load();
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const bulkMoveToSprint = async (sprintId: string | null) => {
+    await Promise.all(
+      Array.from(selectedIds).map((id) =>
+        updateIssue(id, { sprint_id: sprintId, status: sprintId ? 'todo' : 'backlog' })
+      )
+    );
+    setSelectedIds(new Set());
+    load();
+  };
+
+  const bulkUpdateStatus = async (status: IssueStatus) => {
+    await Promise.all(Array.from(selectedIds).map((id) => updateIssue(id, { status })));
+    setSelectedIds(new Set());
+    load();
+  };
+
+  const bulkUpdatePriority = async (priority: Priority) => {
+    await Promise.all(Array.from(selectedIds).map((id) => updateIssue(id, { priority })));
+    setSelectedIds(new Set());
+    load();
+  };
+
   const filtered = issues.filter((i) => {
     if (filterType && i.type !== filterType) return false;
     if (filterAssignee && i.assignee_id !== filterAssignee) return false;
@@ -123,6 +154,41 @@ export default function BacklogPage() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Bulk action toolbar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl shadow-2xl border border-gray-700">
+          <span className="text-sm font-medium mr-1">{selectedIds.size} selected</span>
+          <span className="w-px h-5 bg-gray-600" />
+          <select
+            onChange={(e) => { if (e.target.value) bulkMoveToSprint(e.target.value === 'backlog' ? null : e.target.value); e.target.value = ''; }}
+            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none"
+          >
+            <option value="">Move to sprint...</option>
+            <option value="backlog">→ Backlog</option>
+            {sprints.filter((s) => s.status !== 'completed').map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+          <select
+            onChange={(e) => { if (e.target.value) bulkUpdateStatus(e.target.value as IssueStatus); e.target.value = ''; }}
+            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none"
+          >
+            <option value="">Set status...</option>
+            {ISSUE_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <select
+            onChange={(e) => { if (e.target.value) bulkUpdatePriority(e.target.value as Priority); e.target.value = ''; }}
+            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none"
+          >
+            <option value="">Set priority...</option>
+            {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+          </select>
+          <span className="w-px h-5 bg-gray-600" />
+          <button onClick={() => setSelectedIds(new Set())} className="text-xs text-gray-400 hover:text-white px-2 py-1 rounded transition-colors">
+            <Trash2 size={13} />
+          </button>
+        </div>
+      )}
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
         <div>
@@ -178,6 +244,8 @@ export default function BacklogPage() {
                 sprints={sprints}
                 onClick={() => setOpenIssueId(issue.id)}
                 onMoveToSprint={moveToSprint}
+                selected={selectedIds.has(issue.id)}
+                onToggleSelect={toggleSelect}
               />
             ))}
           </Section>
@@ -202,6 +270,8 @@ export default function BacklogPage() {
                 sprints={sprints}
                 onClick={() => setOpenIssueId(issue.id)}
                 onMoveToSprint={moveToSprint}
+                selected={selectedIds.has(issue.id)}
+                onToggleSelect={toggleSelect}
               />
             ))}
           </Section>
@@ -222,6 +292,8 @@ export default function BacklogPage() {
               sprints={sprints}
               onClick={() => setOpenIssueId(issue.id)}
               onMoveToSprint={moveToSprint}
+                selected={selectedIds.has(issue.id)}
+                onToggleSelect={toggleSelect}
             />
           ))}
           {backlogIssues.length === 0 && (
@@ -342,17 +414,27 @@ function IssueRow({
   sprints,
   onClick,
   onMoveToSprint,
+  selected,
+  onToggleSelect,
 }: {
   issue: Issue;
   sprints: Sprint[];
   onClick: () => void;
   onMoveToSprint: (id: string, sprintId: string | null) => void;
+  selected: boolean;
+  onToggleSelect: (id: string) => void;
 }) {
   return (
     <div
-      className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer group transition-colors"
+      className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer group transition-colors ${selected ? 'bg-blue-50' : ''}`}
       onClick={onClick}
     >
+      <div
+        onClick={(e) => { e.stopPropagation(); onToggleSelect(issue.id); }}
+        className="flex-shrink-0 text-gray-300 hover:text-blue-500 transition-colors cursor-pointer"
+      >
+        {selected ? <CheckSquare size={15} className="text-blue-500" /> : <Square size={15} className="opacity-0 group-hover:opacity-100" />}
+      </div>
       <GripVertical size={14} className="text-gray-300 group-hover:text-gray-400 flex-shrink-0" />
       <IssueTypeIcon type={issue.type} size={14} />
       <span className="font-mono text-[11px] text-gray-400 w-16 flex-shrink-0">{issue.ticket_id}</span>

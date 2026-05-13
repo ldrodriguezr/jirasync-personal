@@ -106,6 +106,10 @@ export default function BoardPage() {
   // Real-time: auto-refresh when any issue changes in this project
   useRealtimeIssues(activeProject?.id ?? null, load);
 
+  // Load on mount and when active project changes
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (activeProject) load(); }, [activeProject?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Keyboard shortcuts
   useKeyboardShortcuts({
     onCreate: () => { if (!openIssueId) setShowCreateModal(true); },

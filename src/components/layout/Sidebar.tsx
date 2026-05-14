@@ -3,22 +3,25 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Layers, List, Zap, FolderOpen, LogOut,
   ChevronDown, Plus, Calendar, Search, BarChart2, Users, Activity,
-  Moon, Sun,
+  Moon, Sun, Briefcase, SlidersHorizontal,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useTheme } from '../../context/ThemeContext';
 import Avatar from '../ui/Avatar';
 
 const NAV = [
-  { to: '/board',     label: 'Board',      Icon: Layers },
-  { to: '/backlog',   label: 'Backlog',    Icon: List },
-  { to: '/sprints',   label: 'Sprints',    Icon: Zap },
-  { to: '/calendar',  label: 'Calendar',   Icon: Calendar },
-  { to: '/gantt',     label: 'Gantt',      Icon: BarChart2 },
-  { to: '/workload',  label: 'Workload',   Icon: Users },
-  { to: '/activity',  label: 'Activity',   Icon: Activity },
-  { to: '/dashboard', label: 'Dashboard',  Icon: LayoutDashboard },
-  { to: '/projects',  label: 'Projects',   Icon: FolderOpen },
+  { to: '/board',         label: 'Board',          Icon: Layers },
+  { to: '/backlog',       label: 'Backlog',         Icon: List },
+  { to: '/sprints',       label: 'Sprints',         Icon: Zap },
+  { to: '/calendar',      label: 'Calendar',        Icon: Calendar },
+  { to: '/gantt',         label: 'Gantt',           Icon: BarChart2 },
+  { to: '/workload',      label: 'Workload',        Icon: Users },
+  { to: '/activity',      label: 'Activity',        Icon: Activity },
+  { to: '/dashboard',     label: 'Dashboard',       Icon: LayoutDashboard },
+  { to: '/portfolio',     label: 'Portfolio',       Icon: Briefcase },
+  { to: '/automations',   label: 'Automations',     Icon: Zap },
+  { to: '/custom-fields', label: 'Custom Fields',   Icon: SlidersHorizontal },
+  { to: '/projects',      label: 'Projects',        Icon: FolderOpen },
 ];
 
 interface SidebarProps {

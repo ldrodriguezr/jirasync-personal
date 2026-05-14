@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   X, Trash2, Archive, ArchiveRestore, Plus, Link as LinkIcon,
-  Send, ExternalLink, Eye, Pencil, Play, Square, Clock, GitBranch,
+  Send, ExternalLink, Eye, Pencil, Play, Square, Clock, GitBranch, SlidersHorizontal,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { marked } from 'marked';
@@ -11,11 +11,12 @@ import {
   addLink, deleteLink, addComment,
   getTimeEntries, logManualTime, deleteTimeEntry, formatDuration,
   getDependencies, addDependency, removeDependency,
-  logActivity,
+  logActivity, getCustomFieldDefs, getCustomFieldValues, upsertCustomFieldValue,
+  runAutomations,
 } from '../../lib/db';
 import { useTimeTracker } from '../../hooks/useTimeTracker';
 import { useApp } from '../../context/AppContext';
-import type { Issue, IssueType, IssueStatus, Priority, Profile, Sprint, TimeEntry, IssueDependency } from '../../types';
+import type { Issue, IssueType, IssueStatus, Priority, Profile, Sprint, TimeEntry, IssueDependency, CustomFieldDef, CustomFieldValue } from '../../types';
 import {
   ISSUE_TYPES, ISSUE_STATUSES, PRIORITIES, STORY_POINTS,
   STATUS_COLORS,
@@ -65,6 +66,9 @@ export default function IssueModal({
   // @mentions in comments
   const [mentionSuggestions, setMentionSuggestions] = useState<Profile[]>([]);
   const commentRef = useRef<HTMLTextAreaElement>(null);
+  // Custom fields
+  const [customFieldDefs, setCustomFieldDefs] = useState<CustomFieldDef[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<CustomFieldValue[]>([]);
 
   const loadIssue = async () => {
     const data = await getIssue(issueId);
@@ -73,12 +77,16 @@ export default function IssueModal({
       setTitle(data.title);
       setDescription(data.description ?? '');
     }
-    const [entries, dependencies] = await Promise.all([
+    const [entries, dependencies, cfDefs, cfVals] = await Promise.all([
       getTimeEntries(issueId),
       getDependencies(issueId),
+      activeProject ? getCustomFieldDefs(activeProject.id) : Promise.resolve([]),
+      getCustomFieldValues(issueId),
     ]);
     setTimeEntries(entries);
     setDeps(dependencies);
+    setCustomFieldDefs(cfDefs);
+    setCustomFieldValues(cfVals);
   };
 
   useEffect(() => { loadIssue(); }, [issueId]);
@@ -111,9 +119,20 @@ export default function IssueModal({
     await patch({ title, description });
   };
 
-  const handleStatusChange = (s: string) => patch({ status: s as IssueStatus });
+  const handleStatusChange = async (s: string) => {
+    const prevStatus = issue!.status;
+    await patch({ status: s as IssueStatus });
+    if (activeProject && issue) {
+      await runAutomations(activeProject.id, { ...issue, status: s }, 'status_changed', { from: prevStatus, to: s });
+    }
+  };
   const handleTypeChange = (t: string) => patch({ type: t as IssueType });
-  const handlePriorityChange = (p: string) => patch({ priority: p as Priority });
+  const handlePriorityChange = async (p: string) => {
+    await patch({ priority: p as Priority });
+    if (activeProject && issue) {
+      await runAutomations(activeProject.id, { ...issue, priority: p as Priority }, 'priority_changed', { to: p });
+    }
+  };
   const handleAssigneeChange = (id: string) => patch({ assignee_id: id || null });
   const handleSprintChange = (id: string) => patch({ sprint_id: id || null });
   const handleDueDateChange = (d: string) => patch({ due_date: d || null });
@@ -121,6 +140,12 @@ export default function IssueModal({
   const handleTagChange = (t: string) => patch({ tag: t || null });
   const handleProjectFieldChange = (v: string) => patch({ project_field: v || null });
   const handleRequestorChange = (v: string) => patch({ requestor: v || null });
+
+  const handleCustomFieldChange = async (fieldId: string, value: string) => {
+    await upsertCustomFieldValue(issueId, fieldId, value);
+    const vals = await getCustomFieldValues(issueId);
+    setCustomFieldValues(vals);
+  };
 
   const handleAddCheck = async () => {
     if (!newCheckText.trim()) return;
@@ -567,7 +592,7 @@ export default function IssueModal({
                     onChange={(e) => handleCommentChange(e.target.value)}
                     placeholder="Add a comment... (@ to mention)"
                     rows={2}
-                    className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none dark:bg-gray-800 dark:text-gray-100"
                   />
                   {mentionSuggestions.length > 0 && (
                     <div className="absolute bottom-full left-0 mb-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 w-52 overflow-hidden">
@@ -730,6 +755,50 @@ export default function IssueModal({
                 className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </Field>
+
+            {/* Custom Fields */}
+            {customFieldDefs.length > 0 && (
+              <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1">
+                  <SlidersHorizontal size={10} /> Custom Fields
+                </p>
+                <div className="space-y-2">
+                  {customFieldDefs.map((def) => {
+                    const val = customFieldValues.find((v) => v.field_id === def.id)?.value ?? '';
+                    return (
+                      <div key={def.id}>
+                        <p className="text-[10px] text-gray-400 mb-0.5">
+                          {def.name}{def.is_required && <span className="text-red-400 ml-0.5">*</span>}
+                        </p>
+                        {def.field_type === 'select' ? (
+                          <select value={val} onChange={(e) => handleCustomFieldChange(def.id, e.target.value)}
+                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <option value="">— None —</option>
+                            {(def.options ?? []).map((o) => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        ) : def.field_type === 'boolean' ? (
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={val === 'true'}
+                              onChange={(e) => handleCustomFieldChange(def.id, e.target.checked ? 'true' : 'false')}
+                              className="w-4 h-4 rounded text-blue-600" />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">{val === 'true' ? 'Yes' : 'No'}</span>
+                          </label>
+                        ) : def.field_type === 'date' ? (
+                          <input type="date" value={val}
+                            onChange={(e) => handleCustomFieldChange(def.id, e.target.value)}
+                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        ) : (
+                          <input type={def.field_type === 'number' ? 'number' : 'text'} value={val}
+                            onChange={(e) => handleCustomFieldChange(def.id, e.target.value)}
+                            placeholder={`Enter ${def.name.toLowerCase()}...`}
+                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Dates */}
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">

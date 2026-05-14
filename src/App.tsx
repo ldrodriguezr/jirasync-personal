@@ -14,6 +14,9 @@ const CalendarPage = lazy(() => import('./pages/CalendarPage'));
 const GanttPage = lazy(() => import('./pages/GanttPage'));
 const WorkloadPage = lazy(() => import('./pages/WorkloadPage'));
 const ActivityPage = lazy(() => import('./pages/ActivityPage'));
+const AutomationsPage = lazy(() => import('./pages/AutomationsPage'));
+const PortfolioPage = lazy(() => import('./pages/PortfolioPage'));
+const CustomFieldsPage = lazy(() => import('./pages/CustomFieldsPage'));
 
 function PageLoader() {
   return (
@@ -60,6 +63,9 @@ function AppRoutes() {
           <Route path="/gantt" element={<GanttPage />} />
           <Route path="/workload" element={<WorkloadPage />} />
           <Route path="/activity" element={<ActivityPage />} />
+          <Route path="/automations" element={<AutomationsPage />} />
+          <Route path="/portfolio" element={<PortfolioPage />} />
+          <Route path="/custom-fields" element={<CustomFieldsPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="*" element={<Navigate to="/board" replace />} />

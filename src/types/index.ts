@@ -232,3 +232,67 @@ export interface ActivityItem {
   created_at: string;
   issue?: { ticket_id: string; title: string } | null;
 }
+
+// ── Tier 2 Types ──────────────────────────────────────────────────────────────
+
+export type AutomationTrigger =
+  | 'status_changed'
+  | 'priority_changed'
+  | 'due_date_reached'
+  | 'sprint_ended'
+  | 'days_in_status'
+  | 'issue_created'
+  | 'assigned_to';
+
+export type AutomationAction =
+  | 'change_status'
+  | 'change_priority'
+  | 'move_to_sprint'
+  | 'notify'
+  | 'assign_to';
+
+export interface AutomationRule {
+  id: string;
+  project_id: string;
+  name: string;
+  is_active: boolean;
+  trigger_type: AutomationTrigger;
+  trigger_value: Record<string, unknown> | null;
+  action_type: AutomationAction;
+  action_value: Record<string, unknown> | null;
+  run_count: number;
+  last_run_at: string | null;
+  created_at: string;
+}
+
+export interface AutomationLog {
+  id: string;
+  rule_id: string;
+  issue_id: string | null;
+  result: 'success' | 'skipped' | 'error';
+  detail: string | null;
+  ran_at: string;
+}
+
+export type CustomFieldType = 'text' | 'number' | 'select' | 'date' | 'boolean';
+
+export interface CustomFieldDef {
+  id: string;
+  project_id: string;
+  name: string;
+  field_type: CustomFieldType;
+  options: string[] | null;
+  is_required: boolean;
+  order_rank: number;
+  created_at: string;
+}
+
+export interface CustomFieldValue {
+  id: string;
+  issue_id: string;
+  field_id: string;
+  value: string | null;
+  field?: CustomFieldDef;
+  created_at: string;
+  updated_at: string;
+}

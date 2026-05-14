@@ -711,3 +711,123 @@ export async function logActivity(payload: {
 }): Promise<void> {
   await jiraDb.from('activity_feed').insert(payload);
 }
+
+// ── Automation Rules ──────────────────────────────────────────────────────────
+import type { AutomationRule, AutomationLog, CustomFieldDef, CustomFieldValue } from '../types';
+
+export async function getAutomationRules(projectId: string): Promise<AutomationRule[]> {
+  const { data } = await jiraDb.from('automation_rules').select('*')
+    .eq('project_id', projectId).order('created_at');
+  return (data as AutomationRule[]) ?? [];
+}
+
+export async function createAutomationRule(payload: Omit<AutomationRule, 'id' | 'run_count' | 'last_run_at' | 'created_at'>): Promise<AutomationRule | null> {
+  const { data } = await jiraDb.from('automation_rules').insert(payload).select().single();
+  return data as AutomationRule | null;
+}
+
+export async function updateAutomationRule(id: string, updates: Partial<AutomationRule>): Promise<void> {
+  await jiraDb.from('automation_rules').update(updates).eq('id', id);
+}
+
+export async function deleteAutomationRule(id: string): Promise<void> {
+  await jiraDb.from('automation_rules').delete().eq('id', id);
+}
+
+export async function getAutomationLogs(ruleId: string): Promise<AutomationLog[]> {
+  const { data } = await jiraDb.from('automation_logs').select('*')
+    .eq('rule_id', ruleId).order('ran_at', { ascending: false }).limit(20);
+  return (data as AutomationLog[]) ?? [];
+}
+
+// Run automations for an issue after a change
+export async function runAutomations(projectId: string, issue: { id: string; status: string; priority: string; sprint_id: string | null; updated_at: string }, trigger: string, triggerMeta?: Record<string, unknown>): Promise<void> {
+  const rules = await getAutomationRules(projectId);
+  const activeRules = rules.filter((r) => r.is_active && r.trigger_type === trigger);
+
+  for (const rule of activeRules) {
+    try {
+      let matched = false;
+      const tv = rule.trigger_value ?? {};
+
+      if (trigger === 'status_changed') {
+        matched = (!tv['from'] || tv['from'] === triggerMeta?.['from']) &&
+                  (!tv['to']   || tv['to']   === triggerMeta?.['to']);
+      } else if (trigger === 'priority_changed') {
+        matched = (!tv['to'] || tv['to'] === triggerMeta?.['to']);
+      } else if (trigger === 'issue_created' || trigger === 'due_date_reached') {
+        matched = true;
+      } else if (trigger === 'days_in_status') {
+        const days = Number(tv['days'] ?? 3);
+        const inStatus = tv['status'] === issue.status;
+        const updatedAt = new Date(issue.updated_at);
+        const daysSince = (Date.now() - updatedAt.getTime()) / 86_400_000;
+        matched = inStatus && daysSince >= days;
+      }
+
+      if (!matched) {
+        await jiraDb.from('automation_logs').insert({ rule_id: rule.id, issue_id: issue.id, result: 'skipped', detail: 'Condition not met' });
+        continue;
+      }
+
+      const av = rule.action_value ?? {};
+      let detail = '';
+
+      if (rule.action_type === 'change_status') {
+        await jiraDb.from('issues').update({ status: av['status'] }).eq('id', issue.id);
+        detail = `Changed status to ${av['status']}`;
+      } else if (rule.action_type === 'change_priority') {
+        await jiraDb.from('issues').update({ priority: av['priority'] }).eq('id', issue.id);
+        detail = `Changed priority to ${av['priority']}`;
+      } else if (rule.action_type === 'move_to_sprint') {
+        if (av['sprint_id']) {
+          await jiraDb.from('issues').update({ sprint_id: av['sprint_id'] }).eq('id', issue.id);
+          detail = `Moved to sprint`;
+        }
+      } else if (rule.action_type === 'assign_to') {
+        await jiraDb.from('issues').update({ assignee_id: av['user_id'] }).eq('id', issue.id);
+        detail = `Assigned to user`;
+      }
+
+      await jiraDb.from('automation_logs').insert({ rule_id: rule.id, issue_id: issue.id, result: 'success', detail });
+      await jiraDb.from('automation_rules').update({ run_count: (rule.run_count ?? 0) + 1, last_run_at: new Date().toISOString() }).eq('id', rule.id);
+    } catch (err) {
+      await jiraDb.from('automation_logs').insert({ rule_id: rule.id, issue_id: issue.id, result: 'error', detail: String(err) });
+    }
+  }
+}
+
+// ── Custom Fields ─────────────────────────────────────────────────────────────
+
+export async function getCustomFieldDefs(projectId: string): Promise<CustomFieldDef[]> {
+  const { data } = await jiraDb.from('custom_field_defs').select('*')
+    .eq('project_id', projectId).order('order_rank');
+  return (data as CustomFieldDef[]) ?? [];
+}
+
+export async function createCustomFieldDef(payload: Omit<CustomFieldDef, 'id' | 'created_at'>): Promise<CustomFieldDef | null> {
+  const { data } = await jiraDb.from('custom_field_defs').insert(payload).select().single();
+  return data as CustomFieldDef | null;
+}
+
+export async function updateCustomFieldDef(id: string, updates: Partial<CustomFieldDef>): Promise<void> {
+  await jiraDb.from('custom_field_defs').update(updates).eq('id', id);
+}
+
+export async function deleteCustomFieldDef(id: string): Promise<void> {
+  await jiraDb.from('custom_field_defs').delete().eq('id', id);
+}
+
+export async function getCustomFieldValues(issueId: string): Promise<CustomFieldValue[]> {
+  const { data } = await jiraDb.from('custom_field_values')
+    .select('*, field:field_id(*)')
+    .eq('issue_id', issueId);
+  return (data as CustomFieldValue[]) ?? [];
+}
+
+export async function upsertCustomFieldValue(issueId: string, fieldId: string, value: string): Promise<void> {
+  await jiraDb.from('custom_field_values').upsert(
+    { issue_id: issueId, field_id: fieldId, value, updated_at: new Date().toISOString() },
+    { onConflict: 'issue_id,field_id' }
+  );
+}

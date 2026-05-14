@@ -136,14 +136,14 @@ export default function CalendarPage() {
                   <button
                     key={issue.id}
                     onClick={() => setOpenIssueId(issue.id)}
-                    className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded text-[11px] bg-blue-50 hover:bg-blue-100 border border-blue-100 transition-colors group"
+                    className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded text-[11px] bg-blue-50 dark:bg-blue-900/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-100 dark:border-blue-800 transition-colors group"
                   >
                     <span
                       className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                         STATUS_DOT[issue.status] ?? 'bg-gray-400'
                       }`}
                     />
-                    <span className="truncate text-gray-700 dark:text-gray-300 font-medium">{issue.title}</span>
+                    <span className="truncate text-gray-700 dark:text-gray-200 font-medium">{issue.title}</span>
                     <PriorityIcon priority={issue.priority} size={10} />
                   </button>
                 ))}

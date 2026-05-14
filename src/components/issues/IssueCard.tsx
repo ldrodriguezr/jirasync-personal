@@ -33,7 +33,7 @@ export default function IssueCard({
       {...draggableProps}
       {...dragHandleProps}
       onClick={onClick}
-      className="bg-white rounded-lg border border-gray-200 p-3 mb-2 shadow-sm cursor-pointer
+      className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-3 mb-2 shadow-sm cursor-pointer
         hover:border-blue-400 hover:shadow-md transition-all group"
     >
       {/* Type + ticket ID */}
@@ -41,14 +41,14 @@ export default function IssueCard({
         <IssueTypeIcon type={issue.type} size={13} />
         <span className="text-[10px] font-mono text-gray-400 font-medium">{issue.ticket_id}</span>
         {issue.tag && (
-          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500 font-medium">
+          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-500 dark:text-gray-400 font-medium">
             {issue.tag}
           </span>
         )}
       </div>
 
       {/* Title */}
-      <p className="text-sm text-gray-800 font-medium leading-snug mb-2 line-clamp-2">{issue.title}</p>
+      <p className="text-sm text-gray-800 dark:text-gray-200 font-medium leading-snug mb-2 line-clamp-2">{issue.title}</p>
 
       {/* Progress bar for checklist */}
       {totalChecks > 0 && (
@@ -57,7 +57,7 @@ export default function IssueCard({
             <CheckSquare size={10} className="text-gray-400" />
             <span className="text-[10px] text-gray-400">{completedChecks}/{totalChecks}</span>
           </div>
-          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1 bg-gray-100 dark:bg-gray-950 rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500 rounded-full transition-all"
               style={{ width: `${totalChecks ? (completedChecks / totalChecks) * 100 : 0}%` }}
@@ -71,7 +71,7 @@ export default function IssueCard({
         <div className="flex items-center gap-2">
           <PriorityIcon priority={issue.priority} size={12} />
           {issue.story_points && (
-            <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold flex items-center justify-center">
+            <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400 text-[10px] font-bold flex items-center justify-center">
               {issue.story_points}
             </span>
           )}

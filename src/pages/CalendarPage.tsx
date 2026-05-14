@@ -64,28 +64,28 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Calendar</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Issues with due dates</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Calendar</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Issues with due dates</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMonth((m) => subMonths(m, 1))}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500"
+            className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="text-sm font-semibold text-gray-700 min-w-[130px] text-center">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 min-w-[130px] text-center">
             {format(month, 'MMMM yyyy')}
           </span>
           <button
             onClick={() => setMonth((m) => addMonths(m, 1))}
-            className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors text-gray-500"
+            className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors text-gray-500 dark:text-gray-400"
           >
             <ChevronRight size={16} />
           </button>
           <button
             onClick={() => setMonth(new Date())}
-            className="ml-1 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
+            className="ml-1 px-3 py-1.5 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 text-gray-600 dark:text-gray-400 transition-colors"
           >
             Today
           </button>
@@ -102,7 +102,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 flex-1 border-t border-l border-gray-200 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-7 flex-1 border-t border-l border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         {days.map((day) => {
           const dayIssues = issuesByDay(day);
           const isCurrentMonth = isSameMonth(day, month);
@@ -111,8 +111,8 @@ export default function CalendarPage() {
           return (
             <div
               key={day.toISOString()}
-              className={`border-b border-r border-gray-200 p-1.5 min-h-[100px] ${
-                isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+              className={`border-b border-r border-gray-200 dark:border-gray-700 p-1.5 min-h-[100px] ${
+                isCurrentMonth ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'
               }`}
             >
               {/* Date number */}
@@ -122,7 +122,7 @@ export default function CalendarPage() {
                     todayCell
                       ? 'bg-blue-600 text-white'
                       : isCurrentMonth
-                      ? 'text-gray-700'
+                      ? 'text-gray-700 dark:text-gray-300'
                       : 'text-gray-300'
                   }`}
                 >
@@ -143,7 +143,7 @@ export default function CalendarPage() {
                         STATUS_DOT[issue.status] ?? 'bg-gray-400'
                       }`}
                     />
-                    <span className="truncate text-gray-700 font-medium">{issue.title}</span>
+                    <span className="truncate text-gray-700 dark:text-gray-300 font-medium">{issue.title}</span>
                     <PriorityIcon priority={issue.priority} size={10} />
                   </button>
                 ))}

@@ -136,8 +136,8 @@ export default function ProjectsPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Projects</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{projects.length} project{projects.length !== 1 ? 's' : ''}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Projects</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{projects.length} project{projects.length !== 1 ? 's' : ''}</p>
         </div>
         <Button onClick={openCreate}>
           <Plus size={16} /> New Project
@@ -145,9 +145,9 @@ export default function ProjectsPage() {
       </div>
 
       {projects.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-200">
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
           <FolderOpen size={48} className="text-gray-300 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-600 mb-1">No projects yet</h3>
+          <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-1">No projects yet</h3>
           <p className="text-sm text-gray-400 mb-6">Create your first project to start tracking work</p>
           <Button onClick={openCreate}><Plus size={16} /> Create Project</Button>
         </div>
@@ -156,8 +156,8 @@ export default function ProjectsPage() {
           {projects.map((p) => (
             <div
               key={p.id}
-              className={`bg-white rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-md
-                ${activeProject?.id === p.id ? 'border-blue-500 shadow-blue-100 shadow-md' : 'border-gray-200'}`}
+              className={`bg-white dark:bg-gray-900 rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-md
+                ${activeProject?.id === p.id ? 'border-blue-500 shadow-blue-100 shadow-md' : 'border-gray-200 dark:border-gray-700'}`}
               onClick={() => setActiveProject(p)}
             >
               <div className="flex items-start justify-between mb-3">
@@ -167,7 +167,7 @@ export default function ProjectsPage() {
                     <span className="font-bold text-sm" style={{ color: p.color }}>{p.key}</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">{p.name}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm leading-tight">{p.name}</h3>
                     <span className="text-[10px] text-gray-400 font-mono">{p.key}</span>
                   </div>
                 </div>
@@ -176,30 +176,30 @@ export default function ProjectsPage() {
                 )}
               </div>
               {p.description && (
-                <p className="text-xs text-gray-500 mb-3 line-clamp-2">{p.description}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">{p.description}</p>
               )}
-              <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
                 <button
                   onClick={(e) => { e.stopPropagation(); openEdit(p.id); }}
-                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
                 >
                   <Pencil size={12} /> Edit
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); openTagManager(p.id); }}
-                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition-colors"
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-purple-600 px-2 py-1 rounded hover:bg-purple-50 transition-colors"
                 >
                   <Tag size={12} /> Tags
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); openGitHubSync(p.id); }}
-                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 px-2 py-1 rounded hover:bg-gray-100 transition-colors"
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 px-2 py-1 rounded hover:bg-gray-100 dark:bg-gray-950 transition-colors"
                 >
                   <Github size={12} /> GitHub
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleDelete(p.id, p.name); }}
-                  className="flex items-center gap-1 text-xs text-gray-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                  className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors"
                 >
                   <Trash2 size={12} /> Delete
                 </button>
@@ -212,7 +212,7 @@ export default function ProjectsPage() {
       {/* Tag Manager Modal */}
       <Modal open={!!tagsProjectId} onClose={() => setTagsProjectId(null)} title="Manage Tags">
         <div className="p-5 space-y-4">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Tags for <strong>{projects.find((p) => p.id === tagsProjectId)?.name}</strong>
           </p>
           <div className="flex gap-2">
@@ -233,13 +233,13 @@ export default function ProjectsPage() {
               <p className="text-sm text-gray-400 text-center py-4">No tags yet. Add one above.</p>
             )}
             {tags.map((tag) => (
-              <div key={tag.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg border border-gray-100">
+              <div key={tag.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2">
                   <span
                     className="w-3 h-3 rounded-full flex-shrink-0"
                     style={{ backgroundColor: tag.color }}
                   />
-                  <span className="text-sm text-gray-700">{tag.name}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{tag.name}</span>
                 </div>
                 <button
                   onClick={() => handleDeleteTag(tag.id)}
@@ -257,7 +257,7 @@ export default function ProjectsPage() {
       <Modal open={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Edit Project' : 'New Project'}>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
               Project Name *
             </label>
             <input
@@ -277,7 +277,7 @@ export default function ProjectsPage() {
 
           {!editingId && (
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
                 Project Key * (2–4 letters, e.g. EFX)
               </label>
               <input
@@ -292,7 +292,7 @@ export default function ProjectsPage() {
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
               Description
             </label>
             <textarea
@@ -305,7 +305,7 @@ export default function ProjectsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
               Color
             </label>
             <div className="flex flex-wrap gap-2">
@@ -331,13 +331,13 @@ export default function ProjectsPage() {
       {/* GitHub Sync Modal */}
       <Modal open={!!ghProjectId} onClose={() => { setGhProjectId(null); setGhResult(null); }} title="GitHub Sync" size="md">
         <div className="p-5 space-y-4">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Sync open PRs and issues from a GitHub repository as Jira issues in <strong>{projects.find((p) => p.id === ghProjectId)?.name}</strong>.
           </p>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Owner / Org</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Owner / Org</label>
               <input
                 value={ghSettings.owner ?? ''}
                 onChange={(e) => setGhSettings((s) => ({ ...s, owner: e.target.value }))}
@@ -346,7 +346,7 @@ export default function ProjectsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1">Repository</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Repository</label>
               <input
                 value={ghSettings.repo ?? ''}
                 onChange={(e) => setGhSettings((s) => ({ ...s, repo: e.target.value }))}
@@ -357,7 +357,7 @@ export default function ProjectsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">GitHub Token <span className="font-normal text-gray-400">(optional for private repos)</span></label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">GitHub Token <span className="font-normal text-gray-400">(optional for private repos)</span></label>
             <input
               type="password"
               value={ghSettings.token ?? ''}
@@ -400,7 +400,7 @@ export default function ProjectsPage() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-gray-800">
             <Button onClick={handleGitHubSave} variant="secondary">
               Save settings
             </Button>

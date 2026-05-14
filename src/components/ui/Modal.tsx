@@ -31,13 +31,13 @@ export default function Modal({ open, onClose, title, children, size = 'md' }: M
       onClick={onClose}
     >
       <div
-        className={`w-full ${sizeClass[size]} bg-white rounded-xl shadow-2xl overflow-hidden`}
+        className={`w-full ${sizeClass[size]} bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-800">{title}</h2>
-            <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded text-gray-500">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <h2 className="font-semibold text-gray-800 dark:text-gray-200">{title}</h2>
+            <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:bg-gray-950 rounded text-gray-500 dark:text-gray-400">
               <X size={16} />
             </button>
           </div>

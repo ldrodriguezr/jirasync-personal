@@ -82,13 +82,13 @@ export default function WorkloadPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Workload</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Capacity planning by team member</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Workload</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Capacity planning by team member</p>
         </div>
         <select
           value={selectedSprintId}
           onChange={(e) => setSelectedSprintId(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All / Backlog</option>
           {sprints.map((s) => (
@@ -101,15 +101,15 @@ export default function WorkloadPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 mb-1">Total Issues</p>
-          <p className="text-2xl font-bold text-gray-800">{sprintIssues.length}</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Issues</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{sprintIssues.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
-          <p className="text-xs text-gray-500 mb-1">Team Members Active</p>
-          <p className="text-2xl font-bold text-gray-800">{byAssignee.length}</p>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Team Members Active</p>
+          <p className="text-2xl font-bold text-gray-800 dark:text-gray-200">{byAssignee.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
           <p className="text-xs text-red-500 mb-1">Overloaded</p>
           <p className="text-2xl font-bold text-red-600">
             {byAssignee.filter((a) => a.points > CAPACITY_PER_PERSON).length}
@@ -123,18 +123,18 @@ export default function WorkloadPage() {
           const pct = Math.min((points / CAPACITY_PER_PERSON) * 100, 100);
           const loadLabel = getLoadLabel(points);
           return (
-            <div key={profile.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div key={profile.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               {/* Person header */}
-              <div className="flex items-center gap-4 px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-4 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
                 <Avatar name={profile.full_name ?? profile.email} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-800 truncate">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
                     {profile.full_name ?? profile.email}
                   </p>
                   <p className={`text-xs font-medium ${loadLabel.color}`}>{loadLabel.text}</p>
                 </div>
                 {/* Stats */}
-                <div className="flex items-center gap-4 text-xs text-gray-500">
+                <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1">
                     <CheckCircle2 size={12} className="text-green-500" />
                     {done} done
@@ -156,7 +156,7 @@ export default function WorkloadPage() {
                     <span>{points} pts</span>
                     <span>{CAPACITY_PER_PERSON} cap</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-2 bg-gray-100 dark:bg-gray-950 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${getLoadColor(points)}`}
                       style={{ width: `${pct}%` }}
@@ -171,21 +171,21 @@ export default function WorkloadPage() {
                   <button
                     key={issue.id}
                     onClick={() => setOpenIssueId(issue.id)}
-                    className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 text-left transition-colors"
+                    className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 text-left transition-colors"
                   >
                     <IssueTypeIcon type={issue.type} size={13} />
                     <span className="font-mono text-[11px] text-gray-400 w-16 flex-shrink-0">{issue.ticket_id}</span>
-                    <span className="flex-1 text-sm text-gray-700 truncate">{issue.title}</span>
+                    <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{issue.title}</span>
                     <PriorityIcon priority={issue.priority} size={12} />
                     <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
                       issue.status === 'done' ? 'bg-green-100 text-green-700' :
                       issue.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-600'
+                      'bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400'
                     }`}>
                       {issue.status.replace('_', ' ')}
                     </span>
                     {issue.story_points && (
-                      <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                      <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                         {issue.story_points}
                       </span>
                     )}
@@ -198,23 +198,23 @@ export default function WorkloadPage() {
 
         {/* Unassigned */}
         {unassigned.length > 0 && (
-          <div className="bg-white rounded-xl border border-dashed border-gray-300 overflow-hidden opacity-70">
-            <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100">
+          <div className="bg-white dark:bg-gray-900 rounded-xl border border-dashed border-gray-300 overflow-hidden opacity-70">
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 dark:border-gray-800">
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                 <Users size={14} className="text-gray-400" />
               </div>
-              <p className="text-sm font-medium text-gray-500">Unassigned ({unassigned.length})</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Unassigned ({unassigned.length})</p>
             </div>
             <div className="divide-y divide-gray-50">
               {unassigned.map((issue) => (
                 <button
                   key={issue.id}
                   onClick={() => setOpenIssueId(issue.id)}
-                  className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 text-left"
+                  className="w-full flex items-center gap-3 px-5 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 text-left"
                 >
                   <IssueTypeIcon type={issue.type} size={13} />
                   <span className="font-mono text-[11px] text-gray-400 w-16 flex-shrink-0">{issue.ticket_id}</span>
-                  <span className="flex-1 text-sm text-gray-700 truncate">{issue.title}</span>
+                  <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{issue.title}</span>
                   <PriorityIcon priority={issue.priority} size={12} />
                 </button>
               ))}

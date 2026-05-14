@@ -189,7 +189,7 @@ export default function BacklogPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full py-20">
         <Layers size={48} className="text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-600 mb-1">No project selected</h3>
+        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-1">No project selected</h3>
       </div>
     );
   }
@@ -232,9 +232,9 @@ export default function BacklogPage() {
         </div>
       )}
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">{activeProject.name}</h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">{activeProject.name}</h1>
           <p className="text-xs text-gray-400">{activeProject.key} · Backlog</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -243,12 +243,12 @@ export default function BacklogPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search... (/)"
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All types</option>
             {ISSUE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -256,14 +256,14 @@ export default function BacklogPage() {
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
-            className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All assignees</option>
             {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
           </select>
           <button
             onClick={exportCSV}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors"
             title="Export to CSV"
           >
             <Download size={13} /> Export CSV
@@ -358,7 +358,7 @@ export default function BacklogPage() {
       <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Add to Backlog">
         <form onSubmit={handleCreate} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Title *</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Title *</label>
             <input
               required
               autoFocus
@@ -370,31 +370,31 @@ export default function BacklogPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Type</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Type</label>
               <select value={createForm.type} onChange={(e) => setCreateForm((f) => ({ ...f, type: e.target.value as IssueType }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 {ISSUE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Priority</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Priority</label>
               <select value={createForm.priority} onChange={(e) => setCreateForm((f) => ({ ...f, priority: e.target.value as Priority }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Assignee</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Assignee</label>
               <select value={createForm.assignee_id} onChange={(e) => setCreateForm((f) => ({ ...f, assignee_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Unassigned</option>
                 {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Sprint</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Sprint</label>
               <select value={createForm.sprint_id} onChange={(e) => setCreateForm((f) => ({ ...f, sprint_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Backlog</option>
                 {sprints.filter((s) => s.status !== 'completed').map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
@@ -402,7 +402,7 @@ export default function BacklogPage() {
               </select>
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
             <Button type="button" variant="secondary" onClick={() => setShowCreateModal(false)}>Cancel</Button>
             <Button type="submit" loading={createLoading}>Add Issue</Button>
           </div>
@@ -446,13 +446,13 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
       <button
-        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors"
         onClick={onToggle}
       >
         {collapsed ? <ChevronRight size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
-        <span className="font-semibold text-gray-800">{title}</span>
+        <span className="font-semibold text-gray-800 dark:text-gray-200">{title}</span>
         {badge && <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeColor}`}>{badge}</span>}
         {subtitle && <span className="ml-auto text-xs text-gray-400">{subtitle}</span>}
       </button>
@@ -480,7 +480,7 @@ function IssueRow({
 }) {
   return (
     <div
-      className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer group transition-colors ${selected ? 'bg-blue-50' : ''}`}
+      className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 cursor-pointer group transition-colors ${selected ? 'bg-blue-50' : ''}`}
       onClick={onClick}
     >
       <div
@@ -492,7 +492,7 @@ function IssueRow({
       <GripVertical size={14} className="text-gray-300 group-hover:text-gray-400 flex-shrink-0" />
       <IssueTypeIcon type={issue.type} size={14} />
       <span className="font-mono text-[11px] text-gray-400 w-16 flex-shrink-0">{issue.ticket_id}</span>
-      <span className="flex-1 text-sm text-gray-800 truncate">{issue.title}</span>
+      <span className="flex-1 text-sm text-gray-800 dark:text-gray-200 truncate">{issue.title}</span>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={() => onClone(issue.id)}
@@ -504,7 +504,7 @@ function IssueRow({
         <select
           value={issue.sprint_id ?? ''}
           onChange={(e) => onMoveToSprint(issue.id, e.target.value || null)}
-          className="text-xs border border-gray-200 rounded px-1.5 py-0.5 bg-white text-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="text-xs border border-gray-200 dark:border-gray-700 rounded px-1.5 py-0.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="">Backlog</option>
           {sprints.filter((s) => s.status !== 'completed').map((s) => (
@@ -517,7 +517,7 @@ function IssueRow({
       </span>
       <PriorityIcon priority={issue.priority} size={13} />
       {issue.story_points && (
-        <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+        <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0">
           {issue.story_points}
         </span>
       )}

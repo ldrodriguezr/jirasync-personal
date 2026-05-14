@@ -3,8 +3,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Layers, List, Zap, FolderOpen, LogOut,
   ChevronDown, Plus, Calendar, Search, BarChart2, Users, Activity,
+  Moon, Sun,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useTheme } from '../../context/ThemeContext';
 import Avatar from '../ui/Avatar';
 
 const NAV = [
@@ -19,19 +21,37 @@ const NAV = [
   { to: '/projects',  label: 'Projects',   Icon: FolderOpen },
 ];
 
-export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void }) {
+interface SidebarProps {
+  onOpenPalette?: () => void;
+  onNavClick?: () => void;
+}
+
+export default function Sidebar({ onOpenPalette, onNavClick }: SidebarProps) {
   const { user, activeProject, projects, setActiveProject, signOut } = useApp();
+  const { theme, toggle: toggleTheme } = useTheme();
   const [projectMenuOpen, setProjectMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const handleNavClick = () => {
+    onNavClick?.();
+  };
 
   return (
     <aside className="w-56 min-h-screen bg-sidebar flex flex-col py-4 gap-2 flex-shrink-0">
       {/* Logo */}
       <div className="px-4 mb-2 flex items-center gap-2">
         <div className="w-7 h-7 rounded bg-blue-600 flex items-center justify-center">
-          <span className="text-white font-bold text-sm">J</span>
+          <span className="text-white font-bold text-sm">M</span>
         </div>
         <span className="text-white font-bold tracking-wide text-sm">MyTask</span>
+        {/* Dark mode toggle */}
+        <button
+          onClick={toggleTheme}
+          className="ml-auto p-1.5 rounded-md text-gray-400 hover:text-white hover:bg-sidebar-hover transition-colors"
+          title={theme === 'dark' ? 'Switch to light' : 'Switch to dark'}
+        >
+          {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+        </button>
       </div>
 
       {/* Command palette trigger */}
@@ -42,7 +62,7 @@ export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void 
         >
           <Search size={12} />
           <span className="flex-1 text-left">Search...</span>
-          <kbd className="text-[9px] bg-black/20 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+          <kbd className="text-[9px] bg-black/20 px-1.5 py-0.5 rounded font-mono hidden md:inline">⌘K</kbd>
         </button>
       </div>
 
@@ -55,10 +75,7 @@ export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void 
           <span className="flex items-center gap-2 truncate">
             {activeProject ? (
               <>
-                <span
-                  className="w-4 h-4 rounded-sm flex-shrink-0"
-                  style={{ backgroundColor: activeProject.color }}
-                />
+                <span className="w-4 h-4 rounded-sm flex-shrink-0" style={{ backgroundColor: activeProject.color }} />
                 <span className="truncate font-medium">{activeProject.name}</span>
               </>
             ) : (
@@ -69,11 +86,11 @@ export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void 
         </button>
 
         {projectMenuOpen && (
-          <div className="absolute left-3 right-3 top-full mt-1 z-50 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
+          <div className="absolute left-3 right-3 top-full mt-1 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
             {projects.map((p) => (
               <button
                 key={p.id}
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 text-gray-800"
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
                 onClick={() => { setActiveProject(p); setProjectMenuOpen(false); }}
               >
                 <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: p.color }} />
@@ -82,7 +99,7 @@ export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void 
               </button>
             ))}
             <button
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 border-t border-gray-100"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 border-t border-gray-100 dark:border-gray-700"
               onClick={() => { setProjectMenuOpen(false); navigate('/projects'); }}
             >
               <Plus size={14} />
@@ -98,6 +115,7 @@ export default function Sidebar({ onOpenPalette }: { onOpenPalette?: () => void 
           <NavLink
             key={to}
             to={to}
+            onClick={handleNavClick}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors
               ${isActive

@@ -46,13 +46,13 @@ export default function AuthPage() {
             <span className="text-white font-bold text-xl">J</span>
           </div>
           <div>
-            <h1 className="text-white font-bold text-xl leading-none">JiraSync</h1>
+            <h1 className="text-white font-bold text-xl leading-none">MyTask</h1>
             <p className="text-gray-400 text-xs">Personal project tracker</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-1">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-8">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
             {mode === 'login' ? 'Welcome back' : 'Create account'}
           </h2>
           <p className="text-sm text-gray-500 mb-6">

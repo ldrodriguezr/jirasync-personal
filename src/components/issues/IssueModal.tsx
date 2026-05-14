@@ -92,7 +92,7 @@ export default function IssueModal({
   if (!issue) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="bg-white rounded-xl p-8">
+        <div className="bg-white dark:bg-gray-900 rounded-xl p-8">
           <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
@@ -277,7 +277,7 @@ export default function IssueModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl bg-white rounded-xl shadow-2xl overflow-hidden"
+        className="w-full max-w-4xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -288,7 +288,7 @@ export default function IssueModal({
             <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded">ARCHIVED</span>
           )}
           <div className="flex-1" />
-          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded">
+          <button onClick={onClose} className="p-1 hover:bg-white dark:bg-gray-900/10 rounded">
             <X size={18} />
           </button>
         </div>
@@ -296,7 +296,7 @@ export default function IssueModal({
         {/* Body: two columns */}
         <div className="flex max-h-[80vh] overflow-hidden">
           {/* Left — main content */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 border-r border-gray-100">
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 border-r border-gray-100 dark:border-gray-800">
             {/* Title */}
             <div>
               <textarea
@@ -304,7 +304,7 @@ export default function IssueModal({
                 onChange={(e) => setTitle(e.target.value)}
                 onBlur={handleSaveText}
                 rows={2}
-                className="w-full text-xl font-bold text-gray-900 resize-none border-0 focus:outline-none focus:ring-0 p-0 bg-transparent leading-snug"
+                className="w-full text-xl font-bold text-gray-900 dark:text-gray-100 resize-none border-0 focus:outline-none focus:ring-0 p-0 bg-transparent leading-snug"
                 placeholder="Issue title..."
               />
             </div>
@@ -315,7 +315,7 @@ export default function IssueModal({
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Description</p>
                 <button
                   onClick={() => setDescPreview((v) => !v)}
-                  className="flex items-center gap-1 text-xs text-gray-400 hover:text-blue-600 transition-colors px-2 py-0.5 rounded border border-gray-200 hover:border-blue-300"
+                  className="flex items-center gap-1 text-xs text-gray-400 hover:text-blue-600 transition-colors px-2 py-0.5 rounded border border-gray-200 dark:border-gray-700 hover:border-blue-300"
                 >
                   {descPreview
                     ? <><Pencil size={11} /> Edit</>
@@ -324,7 +324,7 @@ export default function IssueModal({
               </div>
               {descPreview ? (
                 <div
-                  className="min-h-[96px] border border-gray-200 rounded-lg p-3 bg-white text-sm text-gray-700 prose prose-sm max-w-none"
+                  className="min-h-[96px] border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-white dark:bg-gray-900 text-sm text-gray-700 dark:text-gray-300 prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{
                     __html: description
                       ? marked.parse(description) as string
@@ -337,7 +337,7 @@ export default function IssueModal({
                   onChange={(e) => setDescription(e.target.value)}
                   onBlur={handleSaveText}
                   rows={4}
-                  className="w-full text-sm text-gray-700 resize-y border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 font-mono"
+                  className="w-full text-sm text-gray-700 dark:text-gray-300 resize-y border border-gray-200 dark:border-gray-700 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-800 font-mono"
                   placeholder="Add a description... (supports **markdown**)"
                 />
               )}
@@ -351,7 +351,7 @@ export default function IssueModal({
                 </p>
               </div>
               {totalChecks > 0 && (
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
+                <div className="h-1.5 bg-gray-100 dark:bg-gray-950 rounded-full overflow-hidden mb-3">
                   <div
                     className="h-full bg-green-500 rounded-full transition-all"
                     style={{ width: `${(completedChecks / totalChecks) * 100}%` }}
@@ -367,7 +367,7 @@ export default function IssueModal({
                       onChange={() => handleToggleCheck(c.id, c.is_completed)}
                       className="w-4 h-4 rounded accent-blue-600 cursor-pointer flex-shrink-0"
                     />
-                    <span className={`flex-1 text-sm ${c.is_completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                    <span className={`flex-1 text-sm ${c.is_completed ? 'line-through text-gray-400' : 'text-gray-700 dark:text-gray-300'}`}>
                       {c.text}
                     </span>
                     <button
@@ -385,7 +385,7 @@ export default function IssueModal({
                   onChange={(e) => setNewCheckText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCheck()}
                   placeholder="Add item..."
-                  className="flex-1 text-sm border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   onClick={handleAddCheck}
@@ -404,10 +404,10 @@ export default function IssueModal({
                 </p>
                 <div className="space-y-1.5">
                   {(issue.subtasks ?? []).map((sub) => (
-                    <div key={sub.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                    <div key={sub.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-800">
                       <IssueTypeIcon type={sub.type} size={12} />
                       <span className="font-mono text-[10px] text-gray-400">{sub.ticket_id}</span>
-                      <span className="text-sm text-gray-700 flex-1">{sub.title}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">{sub.title}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${STATUS_COLORS[sub.status]}`}>
                         {sub.status.replace('_', ' ')}
                       </span>
@@ -447,13 +447,13 @@ export default function IssueModal({
                   value={newLinkUrl}
                   onChange={(e) => setNewLinkUrl(e.target.value)}
                   placeholder="https://..."
-                  className="flex-1 text-sm border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <input
                   value={newLinkLabel}
                   onChange={(e) => setNewLinkLabel(e.target.value)}
                   placeholder="Label (optional)"
-                  className="w-32 text-sm border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-32 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   onClick={handleAddLink}
@@ -465,8 +465,8 @@ export default function IssueModal({
             </div>
 
             {/* ── Time Tracking ───────────────────────────────── */}
-            <div className="border border-gray-100 rounded-xl p-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+            <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-4 space-y-3">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
                 <Clock size={12} /> Time Tracking
               </p>
               <div className="flex items-center gap-2">
@@ -483,17 +483,17 @@ export default function IssueModal({
               </div>
               <div className="flex gap-2">
                 <input type="number" value={manualMins} onChange={(e) => setManualMins(e.target.value)}
-                  placeholder="mins" className="w-16 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  placeholder="mins" className="w-16 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 <input value={manualNote} onChange={(e) => setManualNote(e.target.value)}
-                  placeholder="Note (optional)" className="flex-1 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  placeholder="Note (optional)" className="flex-1 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 <button onClick={handleLogManual} disabled={!manualMins}
                   className="text-xs bg-gray-800 text-white px-2.5 py-1.5 rounded hover:bg-gray-700 disabled:opacity-40">Log</button>
               </div>
               {timeEntries.filter((e) => e.stopped_at).length > 0 && (
                 <div className="space-y-1">
                   {timeEntries.filter((e) => e.stopped_at).map((entry) => (
-                    <div key={entry.id} className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded px-2 py-1 group">
-                      <span className="font-medium text-gray-700">{formatDuration(entry.duration_secs ?? 0)}</span>
+                    <div key={entry.id} className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded px-2 py-1 group">
+                      <span className="font-medium text-gray-700 dark:text-gray-300">{formatDuration(entry.duration_secs ?? 0)}</span>
                       {entry.note && <span className="truncate text-gray-400">{entry.note}</span>}
                       <span className="ml-auto text-gray-300 text-[10px]">{format(new Date(entry.started_at), 'MMM d')}</span>
                       <button onClick={() => handleDeleteEntry(entry.id)} className="opacity-0 group-hover:opacity-100 text-red-400">×</button>
@@ -507,26 +507,26 @@ export default function IssueModal({
             </div>
 
             {/* ── Dependencies ─────────────────────────────────── */}
-            <div className="border border-gray-100 rounded-xl p-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+            <div className="border border-gray-100 dark:border-gray-800 rounded-xl p-4 space-y-3">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
                 <GitBranch size={12} /> Blocked By
               </p>
               <div className="flex gap-2">
                 <input value={depTicketId} onChange={(e) => setDepTicketId(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleAddDep(); }}
                   placeholder="Ticket ID (e.g. PROJ-42)"
-                  className="flex-1 text-xs border border-gray-200 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  className="flex-1 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
                 <button onClick={handleAddDep} disabled={!depTicketId.trim()}
                   className="text-xs bg-gray-800 text-white px-2.5 py-1.5 rounded hover:bg-gray-700 disabled:opacity-40">Add</button>
               </div>
               {deps.length > 0 ? (
                 <div className="space-y-1">
                   {deps.map((dep) => (
-                    <div key={dep.id} className="flex items-center gap-2 text-xs bg-gray-50 rounded px-2 py-1.5 group">
+                    <div key={dep.id} className="flex items-center gap-2 text-xs bg-gray-50 dark:bg-gray-800 rounded px-2 py-1.5 group">
                       <IssueTypeIcon type={(dep.depends_on as Issue)?.type ?? 'task'} size={11} />
                       <span className="font-mono text-gray-400 text-[11px]">{(dep.depends_on as Issue)?.ticket_id}</span>
-                      <span className="flex-1 truncate text-gray-600">{(dep.depends_on as Issue)?.title}</span>
-                      <span className={`text-[10px] px-1 py-0.5 rounded ${STATUS_COLORS[(dep.depends_on as Issue)?.status] ?? 'bg-gray-100 text-gray-500'}`}>
+                      <span className="flex-1 truncate text-gray-600 dark:text-gray-400">{(dep.depends_on as Issue)?.title}</span>
+                      <span className={`text-[10px] px-1 py-0.5 rounded ${STATUS_COLORS[(dep.depends_on as Issue)?.status] ?? 'bg-gray-100 dark:bg-gray-950 text-gray-500 dark:text-gray-400'}`}>
                         {(dep.depends_on as Issue)?.status?.replace('_', ' ')}
                       </span>
                       <button onClick={() => handleRemoveDep(dep.id)} className="opacity-0 group-hover:opacity-100 text-red-400">×</button>
@@ -547,13 +547,13 @@ export default function IssueModal({
                       <Avatar name={c.author_name} size="xs" />
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-semibold text-gray-700">{c.author_name}</span>
+                          <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{c.author_name}</span>
                           <span className="text-[10px] text-gray-400">
                             {format(new Date(c.created_at), 'MMM d, HH:mm')}
                           </span>
                           {c.is_system && <span className="text-[10px] text-gray-400 italic">system</span>}
                         </div>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">{c.body}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{c.body}</p>
                       </div>
                     </div>
                   ))}
@@ -567,10 +567,10 @@ export default function IssueModal({
                     onChange={(e) => handleCommentChange(e.target.value)}
                     placeholder="Add a comment... (@ to mention)"
                     rows={2}
-                    className="flex-1 text-sm border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                   {mentionSuggestions.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 w-52 overflow-hidden">
+                    <div className="absolute bottom-full left-0 mb-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 w-52 overflow-hidden">
                       {mentionSuggestions.map((p) => (
                         <button key={p.id} onClick={() => insertMention(p)}
                           className="w-full flex items-center gap-2 px-3 py-2 hover:bg-blue-50 text-sm text-left">
@@ -592,13 +592,13 @@ export default function IssueModal({
           </div>
 
           {/* Right — metadata sidebar */}
-          <div className="w-64 flex-shrink-0 overflow-y-auto p-5 space-y-4 bg-gray-50/50">
+          <div className="w-64 flex-shrink-0 overflow-y-auto p-5 space-y-4 bg-gray-50 dark:bg-gray-800/50">
             {/* Status */}
             <Field label="Status">
               <select
                 value={issue.status}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {ISSUE_STATUSES.map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>
@@ -613,7 +613,7 @@ export default function IssueModal({
                 <select
                   value={issue.type}
                   onChange={(e) => handleTypeChange(e.target.value)}
-                  className="flex-1 text-sm border border-gray-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {ISSUE_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>{t.label}</option>
@@ -629,7 +629,7 @@ export default function IssueModal({
                 <select
                   value={issue.priority}
                   onChange={(e) => handlePriorityChange(e.target.value)}
-                  className="flex-1 text-sm border border-gray-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p.value} value={p.value}>{p.label}</option>
@@ -645,7 +645,7 @@ export default function IssueModal({
                 <select
                   value={issue.assignee_id ?? ''}
                   onChange={(e) => handleAssigneeChange(e.target.value)}
-                  className="flex-1 text-sm border border-gray-200 rounded px-2 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Unassigned</option>
                   {profiles.map((p) => (
@@ -660,7 +660,7 @@ export default function IssueModal({
               <select
                 value={issue.sprint_id ?? ''}
                 onChange={(e) => handleSprintChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Backlog</option>
                 {sprints.map((s) => (
@@ -674,7 +674,7 @@ export default function IssueModal({
               <select
                 value={issue.story_points?.toString() ?? ''}
                 onChange={(e) => handleStoryPointsChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">—</option>
                 {STORY_POINTS.map((sp) => (
@@ -689,7 +689,7 @@ export default function IssueModal({
                 type="date"
                 value={issue.due_date ?? ''}
                 onChange={(e) => handleDueDateChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </Field>
 
@@ -698,7 +698,7 @@ export default function IssueModal({
               <select
                 value={issue.tag ?? ''}
                 onChange={(e) => handleTagChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">None</option>
                 {projectTags.map((t) => (
@@ -715,7 +715,7 @@ export default function IssueModal({
                 onChange={(e) => handleProjectFieldChange(e.target.value)}
                 onBlur={(e) => handleProjectFieldChange(e.target.value)}
                 placeholder="e.g. df-key-kls-uat"
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </Field>
 
@@ -727,12 +727,12 @@ export default function IssueModal({
                 onChange={(e) => handleRequestorChange(e.target.value)}
                 onBlur={(e) => handleRequestorChange(e.target.value)}
                 placeholder="email or name"
-                className="w-full text-sm border border-gray-200 rounded px-2.5 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </Field>
 
             {/* Dates */}
-            <div className="pt-2 border-t border-gray-200 space-y-1">
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-1">
               <p className="text-[10px] text-gray-400">
                 Created {format(new Date(issue.created_at), 'MMM d, yyyy')}
               </p>
@@ -742,7 +742,7 @@ export default function IssueModal({
             </div>
 
             {/* Actions */}
-            <div className="pt-2 border-t border-gray-200 space-y-2">
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
               {saving && (
                 <p className="text-xs text-blue-500 text-center">Saving...</p>
               )}

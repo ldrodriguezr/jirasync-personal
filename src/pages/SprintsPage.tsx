@@ -97,16 +97,16 @@ export default function SprintsPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full py-20">
         <Zap size={48} className="text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-600">No project selected</h3>
+        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400">No project selected</h3>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">{activeProject.name}</h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">{activeProject.name}</h1>
           <p className="text-xs text-gray-400">{activeProject.key} · Sprints</p>
         </div>
         <Button onClick={openCreate}><Plus size={16} /> New Sprint</Button>
@@ -114,9 +114,9 @@ export default function SprintsPage() {
 
       <div className="flex-1 overflow-y-auto p-6 space-y-4 max-w-4xl mx-auto w-full">
         {sorted.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-200">
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
             <Zap size={48} className="text-gray-300 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 mb-1">No sprints yet</h3>
+            <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-1">No sprints yet</h3>
             <p className="text-sm text-gray-400 mb-6">Create your first sprint to start planning</p>
             <Button onClick={openCreate}><Plus size={16} /> Create Sprint</Button>
           </div>
@@ -135,21 +135,21 @@ export default function SprintsPage() {
           const statusColor = {
             active: 'bg-green-100 text-green-700',
             planning: 'bg-blue-100 text-blue-700',
-            completed: 'bg-gray-100 text-gray-600',
+            completed: 'bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400',
           }[sprint.status];
 
           return (
-            <div key={sprint.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div key={sprint.id} className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
               {/* Sprint header */}
-              <div className="px-5 py-4 border-b border-gray-100">
+              <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-semibold text-gray-900">{sprint.name}</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{sprint.name}</h3>
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor}`}>{statusLabel}</span>
                     </div>
                     {sprint.goal && (
-                      <div className="flex items-center gap-1.5 text-sm text-gray-600 mb-2">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400 mb-2">
                         <Target size={13} className="text-gray-400" />
                         {sprint.goal}
                       </div>
@@ -167,7 +167,7 @@ export default function SprintsPage() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button onClick={() => openEdit(sprint)} className="text-xs text-gray-500 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition-colors">
+                    <button onClick={() => openEdit(sprint)} className="text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 px-2 py-1 rounded hover:bg-blue-50 transition-colors">
                       Edit
                     </button>
                     {sprint.status === 'planning' && (
@@ -193,7 +193,7 @@ export default function SprintsPage() {
                       <span>Progress</span>
                       <span>{Math.round(progress)}%</span>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-gray-100 dark:bg-gray-950 rounded-full overflow-hidden">
                       <div
                         className="h-full bg-green-500 rounded-full transition-all"
                         style={{ width: `${progress}%` }}
@@ -210,12 +210,12 @@ export default function SprintsPage() {
                     <div key={issue.id} className="flex items-center gap-3 px-5 py-2.5">
                       <IssueTypeIcon type={issue.type} size={13} />
                       <span className="font-mono text-[11px] text-gray-400 w-16 flex-shrink-0">{issue.ticket_id}</span>
-                      <span className="flex-1 text-sm text-gray-700 truncate">{issue.title}</span>
+                      <span className="flex-1 text-sm text-gray-700 dark:text-gray-300 truncate">{issue.title}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${STATUS_COLORS[issue.status]}`}>
                         {issue.status.replace('_', ' ')}
                       </span>
                       {issue.story_points && (
-                        <span className="w-5 h-5 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold flex items-center justify-center">
+                        <span className="w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-950 text-gray-600 dark:text-gray-400 text-[10px] font-bold flex items-center justify-center">
                           {issue.story_points}
                         </span>
                       )}
@@ -232,28 +232,28 @@ export default function SprintsPage() {
       <Modal open={showModal} onClose={() => setShowModal(false)} title={editingId ? 'Edit Sprint' : 'New Sprint'}>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Sprint Name *</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Sprint Name *</label>
             <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               placeholder="Sprint 1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Sprint Goal</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Sprint Goal</label>
             <input value={form.goal} onChange={(e) => setForm((f) => ({ ...f, goal: e.target.value }))}
               placeholder="What will the team accomplish?" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Start Date</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Start Date</label>
               <input type="date" value={form.start_date} onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">End Date</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">End Date</label>
               <input type="date" value={form.end_date} onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
             <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
             <Button type="submit" loading={loading}>{editingId ? 'Save' : 'Create Sprint'}</Button>
           </div>

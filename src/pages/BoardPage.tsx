@@ -181,7 +181,7 @@ export default function BoardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full py-20">
         <Layers size={48} className="text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-600 mb-1">No project selected</h3>
+        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-1">No project selected</h3>
         <p className="text-sm text-gray-400">Select a project from the sidebar to view its board</p>
       </div>
     );
@@ -190,9 +190,9 @@ export default function BoardPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
+      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
         <div>
-          <h1 className="text-lg font-bold text-gray-900">{activeProject.name}</h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">{activeProject.name}</h1>
           <p className="text-xs text-gray-400">{activeProject.key} · Board</p>
         </div>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
@@ -201,12 +201,12 @@ export default function BoardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search issues... (/)"
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
-            className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All assignees</option>
             {profiles.map((p) => (
@@ -216,7 +216,7 @@ export default function BoardPage() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
-            className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All priorities</option>
             {PRIORITIES.map((p) => (
@@ -226,17 +226,17 @@ export default function BoardPage() {
           <button
             onClick={() => setShowArchived((v) => !v)}
             className={`flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border transition-colors
-              ${showArchived ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+              ${showArchived ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800'}`}
           >
             <Archive size={14} />
             {showArchived ? 'Hide Archived' : 'Show Archived'}
           </button>
-          <button onClick={load} className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors" title="Refresh">
+          <button onClick={load} className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors" title="Refresh">
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
           <button
             onClick={() => setShowShortcuts(true)}
-            className="p-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+            className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors"
             title="Keyboard shortcuts"
           >
             <Keyboard size={14} />
@@ -258,8 +258,8 @@ export default function BoardPage() {
                   {/* Column header */}
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`w-2.5 h-2.5 rounded-full ${color}`} />
-                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</span>
-                    <span className="ml-auto text-xs bg-gray-200 text-gray-600 rounded-full px-2 py-0.5 font-medium">
+                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">{label}</span>
+                    <span className="ml-auto text-xs bg-gray-200 text-gray-600 dark:text-gray-400 rounded-full px-2 py-0.5 font-medium">
                       {colIssues.length}
                     </span>
                   </div>
@@ -271,7 +271,7 @@ export default function BoardPage() {
                         ref={provided.innerRef}
                         {...provided.droppableProps}
                         className={`flex-1 rounded-xl p-2 min-h-[200px] transition-colors
-                          ${snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : 'bg-gray-100'}`}
+                          ${snapshot.isDraggingOver ? 'bg-blue-50 border-2 border-dashed border-blue-300' : 'bg-gray-100 dark:bg-gray-950'}`}
                       >
                         {colIssues.map((issue, index) => (
                           <Draggable key={issue.id} draggableId={issue.id} index={index}>
@@ -290,7 +290,7 @@ export default function BoardPage() {
 
                         {/* Inline quick-add */}
                         {quickAddCol === status ? (
-                          <div className="mt-1 bg-white rounded-lg border border-blue-300 shadow-sm p-2">
+                          <div className="mt-1 bg-white dark:bg-gray-900 rounded-lg border border-blue-300 shadow-sm p-2">
                             <textarea
                               ref={quickAddRef}
                               value={quickAddTitle}
@@ -306,12 +306,12 @@ export default function BoardPage() {
                               }}
                               placeholder="Issue title... (Enter to create, Esc to cancel)"
                               rows={2}
-                              className="w-full text-sm resize-none outline-none text-gray-800 placeholder-gray-400"
+                              className="w-full text-sm resize-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-400"
                             />
                             <div className="flex items-center justify-end gap-2 mt-1.5">
                               <button
                                 onClick={() => { setQuickAddCol(null); setQuickAddTitle(''); }}
-                                className="text-xs text-gray-400 hover:text-gray-600 px-2 py-1 rounded"
+                                className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-400 px-2 py-1 rounded"
                               >
                                 Cancel
                               </button>
@@ -327,7 +327,7 @@ export default function BoardPage() {
                         ) : (
                           <button
                             onClick={() => openQuickAdd(status)}
-                            className="w-full mt-1 flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 py-1.5 px-2 rounded-lg hover:bg-gray-200 transition-colors"
+                            className="w-full mt-1 flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 dark:text-gray-400 py-1.5 px-2 rounded-lg hover:bg-gray-200 transition-colors"
                           >
                             <Plus size={13} /> Add issue
                           </button>
@@ -346,7 +346,7 @@ export default function BoardPage() {
       <Modal open={showCreateModal} onClose={() => setShowCreateModal(false)} title="Create Issue" size="lg">
         <form onSubmit={handleCreate} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
               Title *
             </label>
             <input
@@ -361,70 +361,70 @@ export default function BoardPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Type</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Type</label>
               <select
                 value={createForm.type}
                 onChange={(e) => setCreateForm((f) => ({ ...f, type: e.target.value as IssueType }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {ISSUE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Status</label>
               <select
                 value={createForm.status}
                 onChange={(e) => setCreateForm((f) => ({ ...f, status: e.target.value as IssueStatus }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {ISSUE_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Priority</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Priority</label>
               <select
                 value={createForm.priority}
                 onChange={(e) => setCreateForm((f) => ({ ...f, priority: e.target.value as Priority }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Assignee</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Assignee</label>
               <select
                 value={createForm.assignee_id}
                 onChange={(e) => setCreateForm((f) => ({ ...f, assignee_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Unassigned</option>
                 {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Sprint</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Sprint</label>
               <select
                 value={createForm.sprint_id}
                 onChange={(e) => setCreateForm((f) => ({ ...f, sprint_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Backlog</option>
                 {sprints.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Story Points</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Story Points</label>
               <select
                 value={createForm.story_points}
                 onChange={(e) => setCreateForm((f) => ({ ...f, story_points: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">—</option>
                 {STORY_POINTS.map((sp) => <option key={sp} value={sp}>{sp}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Due Date</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Due Date</label>
               <input
                 type="date"
                 value={createForm.due_date}
@@ -433,11 +433,11 @@ export default function BoardPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tag</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Tag</label>
               <select
                 value={createForm.tag}
                 onChange={(e) => setCreateForm((f) => ({ ...f, tag: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">None</option>
                 {projectTags.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
@@ -446,7 +446,7 @@ export default function BoardPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Description</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Description</label>
             <textarea
               value={createForm.description}
               onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
@@ -458,7 +458,7 @@ export default function BoardPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Project(s)</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Project(s)</label>
               <input
                 type="text"
                 value={createForm.project_field}
@@ -468,7 +468,7 @@ export default function BoardPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Requestor</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Requestor</label>
               <input
                 type="text"
                 value={createForm.requestor}
@@ -479,7 +479,7 @@ export default function BoardPage() {
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
             <Button type="button" variant="secondary" onClick={() => setShowCreateModal(false)}>Cancel</Button>
             <Button type="submit" loading={createLoading}>Create Issue</Button>
           </div>
@@ -508,10 +508,10 @@ export default function BoardPage() {
             ['Esc', 'Close modal / dialog'],
           ].map(([key, desc]) => (
             <div key={key} className="flex items-center gap-4">
-              <kbd className="px-2.5 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono font-semibold text-gray-700 min-w-[2.5rem] text-center">
+              <kbd className="px-2.5 py-1 bg-gray-100 dark:bg-gray-950 border border-gray-300 rounded text-xs font-mono font-semibold text-gray-700 dark:text-gray-300 min-w-[2.5rem] text-center">
                 {key}
               </kbd>
-              <span className="text-sm text-gray-600">{desc}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">{desc}</span>
             </div>
           ))}
         </div>

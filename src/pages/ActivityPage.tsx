@@ -59,13 +59,13 @@ export default function ActivityPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Activity</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Recent changes in {activeProject.name}</p>
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Activity</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Recent changes in {activeProject.name}</p>
         </div>
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800 transition-colors"
         >
           <RefreshCw size={12} className={loading ? 'animate-spin' : ''} /> Refresh
         </button>
@@ -84,16 +84,16 @@ export default function ActivityPage() {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{date}</p>
             <div className="space-y-1">
               {items.map((item) => (
-                <div key={item.id} className="flex items-start gap-3 py-2.5 px-4 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
+                <div key={item.id} className="flex items-start gap-3 py-2.5 px-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:border-gray-700 transition-colors">
                   <span className="text-base mt-0.5 flex-shrink-0">
                     {ACTION_ICONS[item.action] ?? '📌'}
                   </span>
                   <Avatar name={item.actor_name} size="xs" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800">
+                    <p className="text-sm text-gray-800 dark:text-gray-200">
                       <span className="font-medium">{item.actor_name}</span>
                       {' '}
-                      <span className="text-gray-600">{item.detail}</span>
+                      <span className="text-gray-600 dark:text-gray-400">{item.detail}</span>
                       {item.issue && (
                         <span className="ml-1 text-xs font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                           {item.issue.ticket_id}

@@ -54,7 +54,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-full py-20">
         <LayoutDashboard size={48} className="text-gray-300 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-600">No project selected</h3>
+        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400">No project selected</h3>
       </div>
     );
   }
@@ -116,8 +116,8 @@ export default function DashboardPage() {
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">{activeProject.name}</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Dashboard · {format(now, 'MMMM d, yyyy')}</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{activeProject.name}</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Dashboard · {format(now, 'MMMM d, yyyy')}</p>
       </div>
 
       {/* KPI cards */}
@@ -134,18 +134,18 @@ export default function DashboardPage() {
 
       {/* Story Points progress */}
       {totalPoints > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">Story Points Progress</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Story Points Progress</h2>
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-100 dark:bg-gray-950 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-green-500 rounded-full transition-all"
                   style={{ width: `${(donePoints / totalPoints) * 100}%` }}
                 />
               </div>
             </div>
-            <span className="text-sm font-semibold text-gray-700 flex-shrink-0">
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0">
               {donePoints} / {totalPoints} pts
             </span>
           </div>
@@ -154,14 +154,14 @@ export default function DashboardPage() {
 
       {/* Active Sprint */}
       {activeSprint && (
-        <div className="bg-white rounded-xl border border-green-200 p-5">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-green-200 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-gray-700">Active Sprint</h2>
-              <p className="text-lg font-bold text-gray-900 mt-0.5">{activeSprint.name}</p>
-              {activeSprint.goal && <p className="text-sm text-gray-500 mt-0.5">{activeSprint.goal}</p>}
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Active Sprint</h2>
+              <p className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-0.5">{activeSprint.name}</p>
+              {activeSprint.goal && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{activeSprint.goal}</p>}
             </div>
-            <div className="text-right text-sm text-gray-500">
+            <div className="text-right text-sm text-gray-500 dark:text-gray-400">
               {activeSprint.end_date && (
                 <p>Ends {format(parseISO(activeSprint.end_date), 'MMM d')}</p>
               )}
@@ -220,8 +220,8 @@ export default function DashboardPage() {
             return (
               <div key={uid} className="flex items-center gap-2.5 mb-2">
                 <Avatar name={name} size="xs" />
-                <span className="text-xs text-gray-700 flex-1 truncate">{name}</span>
-                <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                <span className="text-xs text-gray-700 dark:text-gray-300 flex-1 truncate">{name}</span>
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-950 px-2 py-0.5 rounded-full">
                   {count}
                 </span>
               </div>
@@ -232,13 +232,13 @@ export default function DashboardPage() {
 
       {/* Burndown Chart */}
       {sprints.filter((s) => s.start_date && s.end_date).length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-gray-700">Burndown Chart</h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Burndown Chart</h2>
             <select
               value={selectedSprintId}
               onChange={(e) => handleBurndownSprintChange(e.target.value)}
-              className="text-xs border border-gray-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select sprint</option>
               {sprints
@@ -279,10 +279,10 @@ export default function DashboardPage() {
 
       {/* Velocity Chart */}
       {velocity.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-gray-700">Velocity</h2>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Velocity</h2>
               <p className="text-xs text-gray-400 mt-0.5">Story points committed vs completed per sprint</p>
             </div>
           </div>
@@ -321,14 +321,14 @@ function KpiCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
       <div className="flex items-center gap-3 mb-3">
         <div className={`p-2 rounded-lg ${iconBg}`}>
           <span className={iconColor}>{icon}</span>
         </div>
-        <span className="text-sm text-gray-500">{label}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
       </div>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
+      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value}</p>
       {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
     </div>
   );
@@ -336,8 +336,8 @@ function KpiCard({
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <h2 className="text-sm font-semibold text-gray-700 mb-4">{title}</h2>
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">{title}</h2>
       {children}
     </div>
   );
@@ -348,10 +348,10 @@ function BarRow({ label, count, total, color }: { label: string; count: number; 
   return (
     <div className="mb-2.5">
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs text-gray-600 capitalize">{label}</span>
-        <span className="text-xs font-semibold text-gray-600">{count}</span>
+        <span className="text-xs text-gray-600 dark:text-gray-400 capitalize">{label}</span>
+        <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{count}</span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-gray-100 dark:bg-gray-950 rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full`} style={{ width: `${pct}%` }} />
       </div>
     </div>

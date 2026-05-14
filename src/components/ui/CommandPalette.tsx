@@ -72,7 +72,7 @@ export default function CommandPalette({ open, onClose }: Props) {
     action: () => {
       nav('/board');
       // Store the issue to open in sessionStorage for Board to pick up
-      sessionStorage.setItem('jirasync_open_issue', i.id);
+      sessionStorage.setItem('mytask_open_issue', i.id);
       onClose();
     },
     type: 'issue' as const,
@@ -134,20 +134,20 @@ export default function CommandPalette({ open, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200"
+        className="w-full max-w-xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100">
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 dark:border-gray-800">
           <Search size={16} className="text-gray-400 flex-shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search issues, pages, projects..."
-            className="flex-1 text-sm text-gray-800 bg-transparent outline-none placeholder-gray-400"
+            className="flex-1 text-sm text-gray-800 dark:text-gray-200 bg-transparent outline-none placeholder-gray-400"
           />
-          <kbd className="text-[10px] px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-500 font-mono">
+          <kbd className="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-950 border border-gray-200 dark:border-gray-700 rounded text-gray-500 dark:text-gray-400 font-mono">
             ESC
           </kbd>
         </div>
@@ -194,10 +194,10 @@ export default function CommandPalette({ open, onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100 bg-gray-50 text-[10px] text-gray-400">
-          <span><kbd className="font-mono bg-white border border-gray-200 px-1 rounded">↑↓</kbd> navigate</span>
-          <span><kbd className="font-mono bg-white border border-gray-200 px-1 rounded">↵</kbd> select</span>
-          <span><kbd className="font-mono bg-white border border-gray-200 px-1 rounded">esc</kbd> close</span>
+        <div className="flex items-center gap-4 px-4 py-2 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-[10px] text-gray-400">
+          <span><kbd className="font-mono bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-1 rounded">↑↓</kbd> navigate</span>
+          <span><kbd className="font-mono bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-1 rounded">↵</kbd> select</span>
+          <span><kbd className="font-mono bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-1 rounded">esc</kbd> close</span>
         </div>
       </div>
     </div>
@@ -220,7 +220,7 @@ function ResultRow({
       data-idx={idx}
       onClick={onSelect}
       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-        selected ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-50'
+        selected ? 'bg-blue-50 text-blue-700' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-800'
       }`}
     >
       <span className={`flex-shrink-0 ${selected ? 'text-blue-500' : 'text-gray-400'}`}>

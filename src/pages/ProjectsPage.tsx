@@ -271,7 +271,7 @@ export default function ProjectsPage() {
                 }));
               }}
               placeholder="My Project"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -286,7 +286,7 @@ export default function ProjectsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, key: e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4) }))}
                 placeholder="EFX"
                 maxLength={4}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
           )}
@@ -342,7 +342,7 @@ export default function ProjectsPage() {
                 value={ghSettings.owner ?? ''}
                 onChange={(e) => setGhSettings((s) => ({ ...s, owner: e.target.value }))}
                 placeholder="e.g. ldrodriguezr"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
             <div>
@@ -351,7 +351,7 @@ export default function ProjectsPage() {
                 value={ghSettings.repo ?? ''}
                 onChange={(e) => setGhSettings((s) => ({ ...s, repo: e.target.value }))}
                 placeholder="e.g. jirasync-personal"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function ProjectsPage() {
               value={ghSettings.token ?? ''}
               onChange={(e) => setGhSettings((s) => ({ ...s, token: e.target.value }))}
               placeholder="ghp_..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 

@@ -203,7 +203,7 @@ export default function BacklogPage() {
           <span className="w-px h-5 bg-gray-600" />
           <select
             onChange={(e) => { if (e.target.value) bulkMoveToSprint(e.target.value === 'backlog' ? null : e.target.value); e.target.value = ''; }}
-            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none"
+            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">Move to sprint...</option>
             <option value="backlog">→ Backlog</option>
@@ -213,14 +213,14 @@ export default function BacklogPage() {
           </select>
           <select
             onChange={(e) => { if (e.target.value) bulkUpdateStatus(e.target.value as IssueStatus); e.target.value = ''; }}
-            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none"
+            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">Set status...</option>
             {ISSUE_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
           <select
             onChange={(e) => { if (e.target.value) bulkUpdatePriority(e.target.value as Priority); e.target.value = ''; }}
-            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none"
+            className="text-xs bg-gray-800 border border-gray-600 rounded px-2 py-1 text-white focus:outline-none dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">Set priority...</option>
             {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
@@ -243,12 +243,12 @@ export default function BacklogPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search... (/)"
-            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm w-36 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           />
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">All types</option>
             {ISSUE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -256,7 +256,7 @@ export default function BacklogPage() {
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">All assignees</option>
             {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
@@ -365,28 +365,28 @@ export default function BacklogPage() {
               value={createForm.title}
               onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="Issue summary..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Type</label>
               <select value={createForm.type} onChange={(e) => setCreateForm((f) => ({ ...f, type: e.target.value as IssueType }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100">
                 {ISSUE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Priority</label>
               <select value={createForm.priority} onChange={(e) => setCreateForm((f) => ({ ...f, priority: e.target.value as Priority }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100">
                 {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Assignee</label>
               <select value={createForm.assignee_id} onChange={(e) => setCreateForm((f) => ({ ...f, assignee_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100">
                 <option value="">Unassigned</option>
                 {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
               </select>
@@ -394,7 +394,7 @@ export default function BacklogPage() {
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Sprint</label>
               <select value={createForm.sprint_id} onChange={(e) => setCreateForm((f) => ({ ...f, sprint_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100">
                 <option value="">Backlog</option>
                 {sprints.filter((s) => s.status !== 'completed').map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
@@ -504,7 +504,7 @@ function IssueRow({
         <select
           value={issue.sprint_id ?? ''}
           onChange={(e) => onMoveToSprint(issue.id, e.target.value || null)}
-          className="text-xs border border-gray-200 dark:border-gray-700 rounded px-1.5 py-0.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="text-xs border border-gray-200 dark:border-gray-700 rounded px-1.5 py-0.5 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
         >
           <option value="">Backlog</option>
           {sprints.filter((s) => s.status !== 'completed').map((s) => (

@@ -43,7 +43,7 @@ export default function AuthPage() {
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
-            <span className="text-white font-bold text-xl">J</span>
+            <span className="text-white font-bold text-xl">M</span>
           </div>
           <div>
             <h1 className="text-white font-bold text-xl leading-none">MyTask</h1>

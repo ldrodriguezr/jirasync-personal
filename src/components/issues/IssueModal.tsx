@@ -385,7 +385,7 @@ export default function IssueModal({
                   onChange={(e) => setNewCheckText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddCheck()}
                   placeholder="Add item..."
-                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 />
                 <button
                   onClick={handleAddCheck}
@@ -447,13 +447,13 @@ export default function IssueModal({
                   value={newLinkUrl}
                   onChange={(e) => setNewLinkUrl(e.target.value)}
                   placeholder="https://..."
-                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 />
                 <input
                   value={newLinkLabel}
                   onChange={(e) => setNewLinkLabel(e.target.value)}
                   placeholder="Label (optional)"
-                  className="w-32 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-32 text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 />
                 <button
                   onClick={handleAddLink}
@@ -483,9 +483,9 @@ export default function IssueModal({
               </div>
               <div className="flex gap-2">
                 <input type="number" value={manualMins} onChange={(e) => setManualMins(e.target.value)}
-                  placeholder="mins" className="w-16 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  placeholder="mins" className="w-16 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100" />
                 <input value={manualNote} onChange={(e) => setManualNote(e.target.value)}
-                  placeholder="Note (optional)" className="flex-1 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  placeholder="Note (optional)" className="flex-1 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100" />
                 <button onClick={handleLogManual} disabled={!manualMins}
                   className="text-xs bg-gray-800 text-white px-2.5 py-1.5 rounded hover:bg-gray-700 disabled:opacity-40">Log</button>
               </div>
@@ -515,7 +515,7 @@ export default function IssueModal({
                 <input value={depTicketId} onChange={(e) => setDepTicketId(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleAddDep(); }}
                   placeholder="Ticket ID (e.g. PROJ-42)"
-                  className="flex-1 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                  className="flex-1 text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100" />
                 <button onClick={handleAddDep} disabled={!depTicketId.trim()}
                   className="text-xs bg-gray-800 text-white px-2.5 py-1.5 rounded hover:bg-gray-700 disabled:opacity-40">Add</button>
               </div>
@@ -598,7 +598,7 @@ export default function IssueModal({
               <select
                 value={issue.status}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 {ISSUE_STATUSES.map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>
@@ -613,7 +613,7 @@ export default function IssueModal({
                 <select
                   value={issue.type}
                   onChange={(e) => handleTypeChange(e.target.value)}
-                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 >
                   {ISSUE_TYPES.map((t) => (
                     <option key={t.value} value={t.value}>{t.label}</option>
@@ -629,7 +629,7 @@ export default function IssueModal({
                 <select
                   value={issue.priority}
                   onChange={(e) => handlePriorityChange(e.target.value)}
-                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 >
                   {PRIORITIES.map((p) => (
                     <option key={p.value} value={p.value}>{p.label}</option>
@@ -645,7 +645,7 @@ export default function IssueModal({
                 <select
                   value={issue.assignee_id ?? ''}
                   onChange={(e) => handleAssigneeChange(e.target.value)}
-                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 text-sm border border-gray-200 dark:border-gray-700 rounded px-2 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
                 >
                   <option value="">Unassigned</option>
                   {profiles.map((p) => (
@@ -660,7 +660,7 @@ export default function IssueModal({
               <select
                 value={issue.sprint_id ?? ''}
                 onChange={(e) => handleSprintChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">Backlog</option>
                 {sprints.map((s) => (
@@ -674,7 +674,7 @@ export default function IssueModal({
               <select
                 value={issue.story_points?.toString() ?? ''}
                 onChange={(e) => handleStoryPointsChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">—</option>
                 {STORY_POINTS.map((sp) => (
@@ -689,7 +689,7 @@ export default function IssueModal({
                 type="date"
                 value={issue.due_date ?? ''}
                 onChange={(e) => handleDueDateChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </Field>
 
@@ -698,7 +698,7 @@ export default function IssueModal({
               <select
                 value={issue.tag ?? ''}
                 onChange={(e) => handleTagChange(e.target.value)}
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">None</option>
                 {projectTags.map((t) => (
@@ -715,7 +715,7 @@ export default function IssueModal({
                 onChange={(e) => handleProjectFieldChange(e.target.value)}
                 onBlur={(e) => handleProjectFieldChange(e.target.value)}
                 placeholder="e.g. df-key-kls-uat"
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </Field>
 
@@ -727,7 +727,7 @@ export default function IssueModal({
                 onChange={(e) => handleRequestorChange(e.target.value)}
                 onBlur={(e) => handleRequestorChange(e.target.value)}
                 placeholder="email or name"
-                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded px-2.5 py-1.5 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </Field>
 

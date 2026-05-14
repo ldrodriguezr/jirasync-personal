@@ -201,12 +201,12 @@ export default function BoardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search issues... (/)"
-            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-sm w-44 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           />
           <select
             value={filterAssignee}
             onChange={(e) => setFilterAssignee(e.target.value)}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">All assignees</option>
             {profiles.map((p) => (
@@ -216,7 +216,7 @@ export default function BoardPage() {
           <select
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
-            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-gray-200 dark:border-gray-700 rounded-lg px-2.5 py-1.5 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
           >
             <option value="">All priorities</option>
             {PRIORITIES.map((p) => (
@@ -354,7 +354,7 @@ export default function BoardPage() {
               value={createForm.title}
               onChange={(e) => setCreateForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="Issue summary..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               autoFocus
             />
           </div>
@@ -365,7 +365,7 @@ export default function BoardPage() {
               <select
                 value={createForm.type}
                 onChange={(e) => setCreateForm((f) => ({ ...f, type: e.target.value as IssueType }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 {ISSUE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
@@ -375,7 +375,7 @@ export default function BoardPage() {
               <select
                 value={createForm.status}
                 onChange={(e) => setCreateForm((f) => ({ ...f, status: e.target.value as IssueStatus }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 {ISSUE_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
@@ -385,7 +385,7 @@ export default function BoardPage() {
               <select
                 value={createForm.priority}
                 onChange={(e) => setCreateForm((f) => ({ ...f, priority: e.target.value as Priority }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 {PRIORITIES.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
               </select>
@@ -395,7 +395,7 @@ export default function BoardPage() {
               <select
                 value={createForm.assignee_id}
                 onChange={(e) => setCreateForm((f) => ({ ...f, assignee_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">Unassigned</option>
                 {profiles.map((p) => <option key={p.id} value={p.id}>{p.full_name ?? p.email}</option>)}
@@ -406,7 +406,7 @@ export default function BoardPage() {
               <select
                 value={createForm.sprint_id}
                 onChange={(e) => setCreateForm((f) => ({ ...f, sprint_id: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">Backlog</option>
                 {sprints.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -417,7 +417,7 @@ export default function BoardPage() {
               <select
                 value={createForm.story_points}
                 onChange={(e) => setCreateForm((f) => ({ ...f, story_points: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">—</option>
                 {STORY_POINTS.map((sp) => <option key={sp} value={sp}>{sp}</option>)}
@@ -429,7 +429,7 @@ export default function BoardPage() {
                 type="date"
                 value={createForm.due_date}
                 onChange={(e) => setCreateForm((f) => ({ ...f, due_date: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
             <div>
@@ -437,7 +437,7 @@ export default function BoardPage() {
               <select
                 value={createForm.tag}
                 onChange={(e) => setCreateForm((f) => ({ ...f, tag: e.target.value }))}
-                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               >
                 <option value="">None</option>
                 {projectTags.map((t) => <option key={t.id} value={t.name}>{t.name}</option>)}
@@ -452,7 +452,7 @@ export default function BoardPage() {
               onChange={(e) => setCreateForm((f) => ({ ...f, description: e.target.value }))}
               rows={3}
               placeholder="Add more details..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
             />
           </div>
 
@@ -464,7 +464,7 @@ export default function BoardPage() {
                 value={createForm.project_field}
                 onChange={(e) => setCreateForm((f) => ({ ...f, project_field: e.target.value }))}
                 placeholder="e.g. df-key-uat"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
             <div>
@@ -474,7 +474,7 @@ export default function BoardPage() {
                 value={createForm.requestor}
                 onChange={(e) => setCreateForm((f) => ({ ...f, requestor: e.target.value }))}
                 placeholder="email or name"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
               />
             </div>
           </div>

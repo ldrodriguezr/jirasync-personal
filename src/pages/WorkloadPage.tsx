@@ -88,7 +88,7 @@ export default function WorkloadPage() {
         <select
           value={selectedSprintId}
           onChange={(e) => setSelectedSprintId(e.target.value)}
-          className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
         >
           <option value="">All / Backlog</option>
           {sprints.map((s) => (

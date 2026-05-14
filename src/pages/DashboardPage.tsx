@@ -238,7 +238,7 @@ export default function DashboardPage() {
             <select
               value={selectedSprintId}
               onChange={(e) => handleBurndownSprintChange(e.target.value)}
-              className="text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="text-xs border border-gray-200 dark:border-gray-700 rounded px-2 py-1 bg-white dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-gray-100"
             >
               <option value="">Select sprint</option>
               {sprints
